@@ -64,3 +64,5 @@ void MNIST::read() {
   read_mnist_label(data_dir + "train-labels-idx1-ubyte", train_labels);
   read_mnist_label(data_dir + "t10k-labels-idx1-ubyte", test_labels);
 }
+
+// comment
