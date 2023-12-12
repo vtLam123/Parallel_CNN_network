@@ -1,0 +1,6 @@
+/Users/volam/Desktop/meterial/university/4th_education/lap_trinh_song_song/final_project/mini-dnn-cpp/build/CMakeFiles/demo.dir
+/Users/volam/Desktop/meterial/university/4th_education/lap_trinh_song_song/final_project/mini-dnn-cpp/build/CMakeFiles/edit_cache.dir
+/Users/volam/Desktop/meterial/university/4th_education/lap_trinh_song_song/final_project/mini-dnn-cpp/build/CMakeFiles/rebuild_cache.dir
+/Users/volam/Desktop/meterial/university/4th_education/lap_trinh_song_song/final_project/mini-dnn-cpp/build/src/CMakeFiles/MiniDNNLib.dir
+/Users/volam/Desktop/meterial/university/4th_education/lap_trinh_song_song/final_project/mini-dnn-cpp/build/src/CMakeFiles/edit_cache.dir
+/Users/volam/Desktop/meterial/university/4th_education/lap_trinh_song_song/final_project/mini-dnn-cpp/build/src/CMakeFiles/rebuild_cache.dir
