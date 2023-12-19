@@ -4,13 +4,13 @@
  * Details in https://github.com/iamhankai/mini-dnn-cpp
  * Copyright 2018 Kai Han
  */
- ///abcád
+
 #include <Eigen/Dense>
 #include <algorithm>
 #include <iostream>
 
 #include "src/layer.h"
-#include "src/layer/conv.h"
+#include "src/layer/CPU_conv.h"
 #include "src/layer/fully_connected.h"
 #include "src/layer/ave_pooling.h"
 #include "src/layer/max_pooling.h"
@@ -28,8 +28,8 @@
 int main()
 {
   // data
-  // MNIST dataset("../data/mnist/");
-  MNIST dataset("/content/Parallel_CNN_network/data/mnist/");
+  MNIST dataset("../data/mnist/");
+  // MNIST dataset("/content/Parallel_CNN_network/data/mnist/");
 
   dataset.read();
   int n_train = dataset.train_data.cols();
