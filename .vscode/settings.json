@@ -64,6 +64,16 @@
     "variant": "cpp",
     "vector": "cpp",
     "algorithm": "cpp",
-    "dense": "cpp"
+    "dense": "cpp",
+    "__memory": "cpp",
+    "functional": "cpp",
+    "iterator": "cpp",
+    "memory_resource": "cpp",
+    "memory": "cpp",
+    "utility": "cpp",
+    "adolcforward": "cpp",
+    "autodiff": "cpp",
+    "fft": "cpp",
+    "core": "cpp"
   }
 }

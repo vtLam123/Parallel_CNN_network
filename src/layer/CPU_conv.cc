@@ -2,7 +2,67 @@
 #include <math.h>
 #include <iostream>
 
-void Conv::init()
+void conv_forward_cpu(float *y, const float *x, const float *k, const int B, const int M, const int C, const int H, const int W, const int K)
+{
+  /*
+  Modify this function to implement the forward pass described in Chapter 16.
+  The code in 16 is for a single image.
+  We have added an additional dimension to the tensors to support an entire mini-batch
+  The goal here is to be correct, not fast (this is the CPU implementation.)
+
+  Function paramters:
+  y - output
+  x - input
+  k - kernel
+  B - batch_size (number of images in x)
+  M - number of output feature maps
+  C - number of input feature maps
+  H - input height dimension
+  W - input width dimension
+  K - kernel height and width (K x K)
+  */
+
+  const int H_out = H - K + 1;
+  const int W_out = W - K + 1;
+
+  // We have some nice #defs for you below to simplify indexing. Feel free to use them, or create your own.
+#define y4d(i3, i2, i1, i0) y[(i3) * (M * H_out * W_out) + (i2) * (H_out * W_out) + (i1) * (W_out) + i0]
+#define x4d(i3, i2, i1, i0) x[(i3) * (C * H * W) + (i2) * (H * W) + (i1) * (W) + i0]
+#define k4d(i3, i2, i1, i0) k[(i3) * (C * K * K) + (i2) * (K * K) + (i1) * (K) + i0]
+
+  // Insert your CPU convolution kernel code here
+
+  for (int b = 0; b < B; b++)
+  { // for each image in the batch
+    for (int m = 0; m < M; m++)
+    { // for each output feature maps
+      for (int h = 0; h < H_out; h++)
+      { // for each output element
+        for (int w = 0; w < W_out; w++)
+        {
+          y4d(b, m, h, w) = 0;
+
+          for (int c = 0; c < C; c++)
+          { // sum over all input feature maps/channels
+            for (int p = 0; p < K; p++)
+            { // KxK filter
+              for (int q = 0; q < K; q++)
+              {
+                y4d(b, m, h, w) += x4d(b, c, h + p, w + q) * k4d(m, c, p, q);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+#undef y4d
+#undef x4d
+#undef k4d
+}
+
+void Conv_CPU::init()
 {
   height_out = (1 + (height_in - height_kernel + 2 * pad_h) / stride);
   width_out = (1 + (width_in - width_kernel + 2 * pad_w) / stride);
@@ -18,127 +78,46 @@ void Conv::init()
   // std::cout << weight.colwise().sum() + bias.transpose() << std::endl;
 }
 
-// im2col, used for bottom
-// image size: Vector (height_in * width_in * channel_in)
-// data_col size: Matrix (hw_out, hw_kernel * channel_in)
-void Conv::im2col(const Vector &image, Matrix &data_col)
-{
-  int hw_in = height_in * width_in;
-  int hw_kernel = height_kernel * width_kernel;
-  int hw_out = height_out * width_out;
-  // im2col
-  data_col.resize(hw_out, hw_kernel * channel_in);
-  for (int c = 0; c < channel_in; c++)
-  {
-    Vector map = image.block(hw_in * c, 0, hw_in, 1); // c-th channel map
-    for (int i = 0; i < hw_out; i++)
-    {
-      int step_h = i / width_out;
-      int step_w = i % width_out;
-      int start_idx = step_h * width_in * stride + step_w * stride; // left-top idx of window
-      for (int j = 0; j < hw_kernel; j++)
-      {
-        int cur_col = start_idx % width_in + j % width_kernel - pad_w; // col after padding
-        int cur_row = start_idx / width_in + j / width_kernel - pad_h;
-        if (cur_col < 0 || cur_col >= width_in || cur_row < 0 ||
-            cur_row >= height_in)
-        {
-          data_col(i, c * hw_kernel + j) = 0;
-        }
-        else
-        {
-          // int pick_idx = start_idx + (j / width_kernel) * width_in + j % width_kernel;
-          int pick_idx = cur_row * width_in + cur_col;
-          data_col(i, c * hw_kernel + j) = map(pick_idx); // pick which pixel
-        }
-      }
-    }
-  }
-}
-
-void Conv::forward(const Matrix &bottom)
+void Conv_CPU::forward(const Matrix &bottom)
 {
   int n_sample = bottom.cols();
   top.resize(height_out * width_out * channel_out, n_sample);
   data_cols.resize(n_sample);
-  for (int i = 0; i < n_sample; i++)
-  {
-    // im2col
-    Matrix data_col;
-    im2col(bottom.col(i), data_col);
-    data_cols[i] = data_col;
-    // conv by product
-    Matrix result = data_col * weight; // result: (hw_out, channel_out)
-    result.rowwise() += bias.transpose();
-    top.col(i) = Eigen::Map<Vector>(result.data(), result.size());
-  }
+  float *x = (float *)bottom.data();
+  float *y = (float *)top.data();
+  float *k = (float *)weight.data();
+  float *b = (float *)bias.data();
+
+  const int B = n_sample;
+  const int M = channel_out;
+  const int C = channel_in;
+  const int K = height_kernel; // Assuming width_kernel is also K
+
+  std::cout << "Conv-CPU==" << std::endl;
+  std::cout << *x << std::endl;
+  std::cout << *y << std::endl;
+  std::cout << *k << std::endl;
+  std::cout << *b << std::endl;
+  std::cout << B << std::endl;
+  std::cout << M << std::endl;
+  std::cout << C << std::endl;
+  std::cout << K << std::endl;
+  // Start timer
+  auto start_time = std::chrono::high_resolution_clock::now();
+
+  conv_forward_cpu(y, x, k, B, M, C, height_in, width_in, K);
+
+  // Stop timer
+  auto end_time = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<float, std::milli> duration = (end_time - start_time);
+  std::cout << "Op Time: " << duration.count() << " ms" << std::endl;
 }
 
-// col2im, used for grad_bottom
-// data_col size: Matrix (hw_out, hw_kernel * channel_in)
-// image size: Vector (height_in * width_in * channel_in)
-void Conv::col2im(const Matrix &data_col, Vector &image)
+void Conv_CPU::backward(const Matrix &bottom, const Matrix &grad_top)
 {
-  int hw_in = height_in * width_in;
-  int hw_kernel = height_kernel * width_kernel;
-  int hw_out = height_out * width_out;
-  // col2im
-  image.resize(hw_in * channel_in);
-  image.setZero();
-  for (int c = 0; c < channel_in; c++)
-  {
-    for (int i = 0; i < hw_out; i++)
-    {
-      int step_h = i / width_out;
-      int step_w = i % width_out;
-      int start_idx = step_h * width_in * stride + step_w * stride; // left-top idx of window
-      for (int j = 0; j < hw_kernel; j++)
-      {
-        int cur_col = start_idx % width_in + j % width_kernel - pad_w; // col after padding
-        int cur_row = start_idx / width_in + j / width_kernel - pad_h;
-        if (cur_col < 0 || cur_col >= width_in || cur_row < 0 ||
-            cur_row >= height_in)
-        {
-          continue;
-        }
-        else
-        {
-          // int pick_idx = start_idx + (j / width_kernel) * width_in + j % width_kernel;
-          int pick_idx = cur_row * width_in + cur_col;
-          image(c * hw_in + pick_idx) += data_col(i, c * hw_kernel + j); // pick which pixel
-        }
-      }
-    }
-  }
 }
 
-void Conv::backward(const Matrix &bottom, const Matrix &grad_top)
-{
-  int n_sample = bottom.cols();
-  grad_weight.setZero();
-  grad_bias.setZero();
-  grad_bottom.resize(height_in * width_in * channel_in, n_sample);
-  grad_bottom.setZero();
-  for (int i = 0; i < n_sample; i++)
-  {
-    // im2col of grad_top
-    Matrix grad_top_i = grad_top.col(i);
-    Matrix grad_top_i_col = Eigen::Map<Matrix>(grad_top_i.data(),
-                                               height_out * width_out, channel_out);
-    // d(L)/d(w) = \sum{ d(L)/d(z_i) * d(z_i)/d(w) }
-    grad_weight += data_cols[i].transpose() * grad_top_i_col;
-    // d(L)/d(b) = \sum{ d(L)/d(z_i) * d(z_i)/d(b) }
-    grad_bias += grad_top_i_col.colwise().sum().transpose();
-    // d(L)/d(x) = \sum{ d(L)/d(z_i) * d(z_i)/d(x) } = d(L)/d(z)_col * w'
-    Matrix grad_bottom_i_col = grad_top_i_col * weight.transpose();
-    // col2im of grad_bottom
-    Vector grad_bottom_i;
-    col2im(grad_bottom_i_col, grad_bottom_i);
-    grad_bottom.col(i) = grad_bottom_i;
-  }
-}
-
-void Conv::update(Optimizer &opt)
+void Conv_CPU::update(Optimizer &opt)
 {
   Vector::AlignedMapType weight_vec(weight.data(), weight.size());
   Vector::AlignedMapType bias_vec(bias.data(), bias.size());
@@ -149,7 +128,7 @@ void Conv::update(Optimizer &opt)
   opt.update(bias_vec, grad_bias_vec);
 }
 
-std::vector<float> Conv::get_parameters() const
+std::vector<float> Conv_CPU::get_parameters() const
 {
   std::vector<float> res(weight.size() + bias.size());
   // Copy the data of weights and bias to a long vector
@@ -158,7 +137,7 @@ std::vector<float> Conv::get_parameters() const
   return res;
 }
 
-void Conv::set_parameters(const std::vector<float> &param)
+void Conv_CPU::set_parameters(const std::vector<float> &param)
 {
   if (static_cast<int>(param.size()) != weight.size() + bias.size())
     throw std::invalid_argument("Parameter size does not match");
@@ -166,7 +145,7 @@ void Conv::set_parameters(const std::vector<float> &param)
   std::copy(param.begin() + weight.size(), param.end(), bias.data());
 }
 
-std::vector<float> Conv::get_derivatives() const
+std::vector<float> Conv_CPU::get_derivatives() const
 {
   std::vector<float> res(grad_weight.size() + grad_bias.size());
   // Copy the data of weights and bias to a long vector
