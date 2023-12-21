@@ -1,12 +1,12 @@
-demo: demo.o custom
-	nvcc -o demo -lm -lcuda -lrt demo.o src/network.o src/mnist.o src/layer/*.o src/loss/*.o src/layer/custom/*.o src/optimizer/*.o -I./ -L/usr/local/cuda/lib64 -lcudart
+# demo: demo.o custom
+# 	nvcc -o demo -lm -lcuda -lrt demo.o src/network.o src/mnist.o src/layer/*.o src/loss/*.o src/layer/custom/*.o src/optimizer/*.o -I./ -L/usr/local/cuda/lib64 -lcudart
 
-demo.o: demo.cc
-	nvcc --compile demo.cc -I./ -L/usr/local/cuda/lib64 -lcudart
+# demo.o: demo.cc
+# 	nvcc --compile demo.cc -I./ -L/usr/local/cuda/lib64 -lcudart
 
 ############################################################################
 
-main: main.o custom
+main: main.o new_layer
 	nvcc -o main -lm -lcuda -lrt main.o dnnNetwork.o src/network.o src/mnist.o src/layer/*.o src/loss/*.o src/optimizer/*.o -I./ -L/usr/local/cuda/lib64 -lcudart
 
 main.o: main.cc
@@ -31,7 +31,7 @@ layer: src/layer/conv.cc src/layer/ave_pooling.cc src/layer/fully_connected.cc s
 	nvcc --compile src/layer/sigmoid.cc -o src/layer/sigmoid.o -I./ -L/usr/local/cuda/lib64 -lcudart
 	nvcc --compile src/layer/softmax.cc -o src/layer/softmax.o -I./ -L/usr/local/cuda/lib64 -lcudart
 
-custom: 
+new_layer: 
 	nvcc --compile src/layer/new_layer/GPU_forward_conv.cu -o src/layer/new_layer/GPU_forward_conv.o -I./ -L/usr/local/cuda/lib64 -lcudart 
 
 loss: src/loss/cross_entropy_loss.cc src/loss/mse_loss.cc
