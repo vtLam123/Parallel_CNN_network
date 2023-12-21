@@ -13,7 +13,7 @@ main.o: main.cc
 	nvcc --compile main.cc -I./ -L/usr/local/cuda/lib64 -lcudart
 
 dnnNetwork.o: dnnNetwork.cc
-	nvcc --compile dnnNetwork.cc -I./ -L/usr/local/cuda/lib64 -lcudart
+	nvcc --compile dnnNetwork.cc dnnNetwork.o -I./ -L/usr/local/cuda/lib64 -lcudart
 
 network.o: src/network.cc
 	nvcc --compile src/network.cc -o src/network.o -I./ -L/usr/local/cuda/lib64 -lcudart
