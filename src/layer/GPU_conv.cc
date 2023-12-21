@@ -1,8 +1,8 @@
-#include "GPU_conv.h"
+#include "GPU_Conv_GPU.h"
 #include <math.h>
 #include <iostream>
 
-void Conv::init()
+void Conv_GPU::init()
 {
     height_out = (1 + (height_in - height_kernel + 2 * pad_h) / stride);
     width_out = (1 + (width_in - width_kernel + 2 * pad_w) / stride);
@@ -21,7 +21,7 @@ void Conv::init()
 // im2col, used for bottom
 // image size: Vector (height_in * width_in * channel_in)
 // data_col size: Matrix (hw_out, hw_kernel * channel_in)
-void Conv::im2col(const Vector &image, Matrix &data_col)
+void Conv_GPU::im2col(const Vector &image, Matrix &data_col)
 {
     int hw_in = height_in * width_in;
     int hw_kernel = height_kernel * width_kernel;
@@ -56,7 +56,7 @@ void Conv::im2col(const Vector &image, Matrix &data_col)
     }
 }
 
-void Conv::forward(const Matrix &bottom)
+void Conv_GPU::forward(const Matrix &bottom)
 {
     int n_sample = bottom.cols();
     top.resize(height_out * width_out * channel_out, n_sample);
@@ -67,7 +67,7 @@ void Conv::forward(const Matrix &bottom)
         Matrix data_col;
         im2col(bottom.col(i), data_col);
         data_cols[i] = data_col;
-        // conv by product
+        // Conv_GPU by product
         Matrix result = data_col * weight; // result: (hw_out, channel_out)
         result.rowwise() += bias.transpose();
         top.col(i) = Eigen::Map<Vector>(result.data(), result.size());
@@ -77,7 +77,7 @@ void Conv::forward(const Matrix &bottom)
 // col2im, used for grad_bottom
 // data_col size: Matrix (hw_out, hw_kernel * channel_in)
 // image size: Vector (height_in * width_in * channel_in)
-void Conv::col2im(const Matrix &data_col, Vector &image)
+void Conv_GPU::col2im(const Matrix &data_col, Vector &image)
 {
     int hw_in = height_in * width_in;
     int hw_kernel = height_kernel * width_kernel;
@@ -112,7 +112,7 @@ void Conv::col2im(const Matrix &data_col, Vector &image)
     }
 }
 
-void Conv::backward(const Matrix &bottom, const Matrix &grad_top)
+void Conv_GPU::backward(const Matrix &bottom, const Matrix &grad_top)
 {
     int n_sample = bottom.cols();
     grad_weight.setZero();
@@ -138,7 +138,7 @@ void Conv::backward(const Matrix &bottom, const Matrix &grad_top)
     }
 }
 
-void Conv::update(Optimizer &opt)
+void Conv_GPU::update(Optimizer &opt)
 {
     Vector::AlignedMapType weight_vec(weight.data(), weight.size());
     Vector::AlignedMapType bias_vec(bias.data(), bias.size());
@@ -149,7 +149,7 @@ void Conv::update(Optimizer &opt)
     opt.update(bias_vec, grad_bias_vec);
 }
 
-std::vector<float> Conv::get_parameters() const
+std::vector<float> Conv_GPU::get_parameters() const
 {
     std::vector<float> res(weight.size() + bias.size());
     // Copy the data of weights and bias to a long vector
@@ -158,7 +158,7 @@ std::vector<float> Conv::get_parameters() const
     return res;
 }
 
-void Conv::set_parameters(const std::vector<float> &param)
+void Conv_GPU::set_parameters(const std::vector<float> &param)
 {
     if (static_cast<int>(param.size()) != weight.size() + bias.size())
         throw std::invalid_argument("Parameter size does not match");
@@ -166,7 +166,7 @@ void Conv::set_parameters(const std::vector<float> &param)
     std::copy(param.begin() + weight.size(), param.end(), bias.data());
 }
 
-std::vector<float> Conv::get_derivatives() const
+std::vector<float> Conv_GPU::get_derivatives() const
 {
     std::vector<float> res(grad_weight.size() + grad_bias.size());
     // Copy the data of weights and bias to a long vector
