@@ -15,8 +15,8 @@
 
 #include "src/layer.h"
 #include "src/layer/conv.h"
-// #include "src/layer/conv_cpu.h"
-// #include "src/layer/conv_gpu.h"
+#include "src/layer/CPU_conv.h"
+#include "src/layer/GPU_conv.h"
 #include "src/layer/fully_connected.h"
 #include "src/layer/ave_pooling.h"
 #include "src/layer/max_pooling.h"

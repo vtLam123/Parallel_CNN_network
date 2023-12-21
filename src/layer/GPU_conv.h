@@ -1,8 +1,11 @@
-#ifndef SRC_LAYER_CONV_H_
-#define SRC_LAYER_CONV_H_
+#ifndef SRC_LAYER_GPU_CONV_H_
+#define SRC_LAYER_GPU_CONV_H_
 
 #include <vector>
 #include "../layer.h"
+#include <cuda_runtime_api.h>
+#include "./new_layer/GPU_new_forward.h"
+#include "./new_layer/GPU_utils.h"
 
 class Conv_GPU : public Layer
 {
