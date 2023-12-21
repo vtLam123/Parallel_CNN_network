@@ -60,18 +60,52 @@ void Conv_GPU::forward(const Matrix &bottom)
 {
     int n_sample = bottom.cols();
     top.resize(height_out * width_out * channel_out, n_sample);
-    data_cols.resize(n_sample);
-    for (int i = 0; i < n_sample; i++)
-    {
-        // im2col
-        Matrix data_col;
-        im2col(bottom.col(i), data_col);
-        data_cols[i] = data_col;
-        // Conv_GPU by product
-        Matrix result = data_col * weight; // result: (hw_out, channel_out)
-        result.rowwise() += bias.transpose();
-        top.col(i) = Eigen::Map<Vector>(result.data(), result.size());
-    }
+    float *x = (float *)bottom.data();
+    float *y = (float *)top.data();
+    float *k = (float *)weight.data();
+    float *b = (float *)bias.data();
+
+    const int B = n_sample;
+    const int M = channel_out;
+    const int C = channel_in;
+    const int K = height_kernel; // Assuming width_kernel is also K
+
+    float *x_d;
+    float *y_d;
+    float *k_d;
+
+    std::cout << "Conv-GPU==" << std::endl;
+
+    // Launch marker kernel to aid with student function timing
+    gpuUtils.insert_pre_barrier_kernel();
+
+    // Start layer timer
+    auto start_time_layer = std::chrono::high_resolution_clock::now();
+    // Data transfer CPU to GPU
+    gpuInterface.conv_forward_gpu_prolog(y, x, k, &y_d, &x_d, &k_d, B, M, C, height_in, width_in, K);
+
+    // Start kernel timer
+    auto start_time_kernel = std::chrono::high_resolution_clock::now();
+    // Hand off to GPU for computation
+    gpuInterface.conv_forward_gpu(y_d, x_d, k_d, B, M, C, height_in, width_in, K);
+    cudaDeviceSynchronize();
+    // Stop kernel timer
+    auto end_time_kernel = std::chrono::high_resolution_clock::now();
+
+    // Data transfer GPU to CPU
+    gpuInterface.conv_forward_gpu_epilog(y, y_d, x_d, k_d, B, M, C, height_in, width_in, K);
+
+    // Stop layer timer
+    auto end_time_layer = std::chrono::high_resolution_clock::now();
+
+    // Launch barrier kernel to aid with timing with nsight-compute
+    gpuUtils.insert_post_barrier_kernel();
+
+    std::chrono::duration<float, std::milli> duration_layer = (end_time_layer - start_time_layer);
+    std::cout << "Layer Time: " << duration_layer.count() << " ms" << std::endl;
+
+    std::chrono::duration<float, std::milli> duration_kernel = (end_time_kernel - start_time_kernel);
+    std::cout << "Op Time: " << duration_kernel.count() << " ms" << std::endl;
 }
 
 // col2im, used for grad_bottom
@@ -114,39 +148,10 @@ void Conv_GPU::col2im(const Matrix &data_col, Vector &image)
 
 void Conv_GPU::backward(const Matrix &bottom, const Matrix &grad_top)
 {
-    int n_sample = bottom.cols();
-    grad_weight.setZero();
-    grad_bias.setZero();
-    grad_bottom.resize(height_in * width_in * channel_in, n_sample);
-    grad_bottom.setZero();
-    for (int i = 0; i < n_sample; i++)
-    {
-        // im2col of grad_top
-        Matrix grad_top_i = grad_top.col(i);
-        Matrix grad_top_i_col = Eigen::Map<Matrix>(grad_top_i.data(),
-                                                   height_out * width_out, channel_out);
-        // d(L)/d(w) = \sum{ d(L)/d(z_i) * d(z_i)/d(w) }
-        grad_weight += data_cols[i].transpose() * grad_top_i_col;
-        // d(L)/d(b) = \sum{ d(L)/d(z_i) * d(z_i)/d(b) }
-        grad_bias += grad_top_i_col.colwise().sum().transpose();
-        // d(L)/d(x) = \sum{ d(L)/d(z_i) * d(z_i)/d(x) } = d(L)/d(z)_col * w'
-        Matrix grad_bottom_i_col = grad_top_i_col * weight.transpose();
-        // col2im of grad_bottom
-        Vector grad_bottom_i;
-        col2im(grad_bottom_i_col, grad_bottom_i);
-        grad_bottom.col(i) = grad_bottom_i;
-    }
 }
 
 void Conv_GPU::update(Optimizer &opt)
 {
-    Vector::AlignedMapType weight_vec(weight.data(), weight.size());
-    Vector::AlignedMapType bias_vec(bias.data(), bias.size());
-    Vector::ConstAlignedMapType grad_weight_vec(grad_weight.data(), grad_weight.size());
-    Vector::ConstAlignedMapType grad_bias_vec(grad_bias.data(), grad_bias.size());
-
-    opt.update(weight_vec, grad_weight_vec);
-    opt.update(bias_vec, grad_bias_vec);
 }
 
 std::vector<float> Conv_GPU::get_parameters() const
