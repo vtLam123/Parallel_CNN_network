@@ -74,6 +74,8 @@
     "adolcforward": "cpp",
     "autodiff": "cpp",
     "fft": "cpp",
-    "core": "cpp"
-  }
+    "core": "cpp",
+    "random": "cpp"
+  },
+  "C_Cpp.errorSquiggles": "disabled"
 }
