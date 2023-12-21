@@ -10,7 +10,7 @@ main: main.o custom
 	nvcc -o main -lm -lcuda -lrt main.o dnnNetwork.o src/network.o src/mnist.o src/layer/*.o src/loss/*.o src/optimizer/*.o -I./ -L/usr/local/cuda/lib64 -lcudart
 
 main.o: main.cc
-	nvcc --compile main.cc -I./ -L/usr/local/cuda/lib64 -lcudart
+	nvcc --compile main.cc main.o -I./ -L/usr/local/cuda/lib64 -lcudart
 
 dnnNetwork.o: dnnNetwork.cc
 	nvcc --compile dnnNetwork.cc dnnNetwork.o -I./ -L/usr/local/cuda/lib64 -lcudart
