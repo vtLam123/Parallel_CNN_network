@@ -32,7 +32,7 @@ layer: src/layer/conv.cc src/layer/ave_pooling.cc src/layer/fully_connected.cc s
 	nvcc --compile src/layer/softmax.cc -o src/layer/softmax.o -I./ -L/usr/local/cuda/lib64 -lcudart
 
 new_layer: 
-	nvcc --compile src/layer/new_layer/GPU_forward_conv.cu -o src/layer/new_layer/GPU_forward_conv.o -I./ -L/usr/local/cuda/lib64 -lcudart 
+	nvcc --compile src/layer/GPU_forward_conv.cu -o src/layer/GPU_forward_conv.o -I./ -L/usr/local/cuda/lib64 -lcudart 
 
 loss: src/loss/cross_entropy_loss.cc src/loss/mse_loss.cc
 	nvcc --compile src/loss/cross_entropy_loss.cc -o src/loss/cross_entropy_loss.o -I./ -L/usr/local/cuda/lib64 -lcudart
