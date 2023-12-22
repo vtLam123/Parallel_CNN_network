@@ -6,14 +6,14 @@
 
 ############################################################################
 
-main: main.o new_layer
+main: main.o dnnNetwork.o network.o mnist.o layer new_layer loss optimizer
 	nvcc -o main -lm -lcuda -lrt main.o dnnNetwork.o src/network.o src/mnist.o src/layer/*.o src/loss/*.o src/optimizer/*.o -I./ -L/usr/local/cuda/lib64 -lcudart
 
 main.o: main.cc
-	nvcc --compile main.cc main.o -I./ -L/usr/local/cuda/lib64 -lcudart
+	nvcc --compile main.cc -o main.o -I./ -L/usr/local/cuda/lib64 -lcudart
 
 dnnNetwork.o: dnnNetwork.cc
-	nvcc --compile dnnNetwork.cc dnnNetwork.o -I./ -L/usr/local/cuda/lib64 -lcudart
+	nvcc --compile dnnNetwork.cc -o dnnNetwork.o -I./ -L/usr/local/cuda/lib64 -lcudart
 
 network.o: src/network.cc
 	nvcc --compile src/network.cc -o src/network.o -I./ -L/usr/local/cuda/lib64 -lcudart
