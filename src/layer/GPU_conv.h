@@ -5,8 +5,8 @@
 #include <chrono>
 #include "../layer.h"
 #include <cuda_runtime_api.h>
-#include "./custom/gpu-new-forward.h"
-#include "./custom/gpu-utils.h"
+#include "./new_layer/GPU_new_forward.h"
+#include "./new_layer/GPU_utils.h"
 
 class Conv_Custom : public Layer
 {
