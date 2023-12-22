@@ -2,7 +2,6 @@
 #define SRC_LAYER_GPU_CONV_H_
 
 #include <vector>
-#include <chrono>
 #include "../layer.h"
 #include <cuda_runtime_api.h>
 #include "./new_layer/GPU_new_forward.h"
