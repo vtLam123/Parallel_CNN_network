@@ -99,7 +99,7 @@ void Conv_GPU::forward(const Matrix &bottom)
     auto end_time_layer = std::chrono::high_resolution_clock::now();
 
     // Launch barrier kernel to aid with timing with nsight-compute
-    gpuUtils.insert_post_barrier_kernel();
+    GPU_Utils.insert_post_barrier_kernel();
 
     std::chrono::duration<float, std::milli> duration_layer = (end_time_layer - start_time_layer);
     std::cout << "Layer Time: " << duration_layer.count() << " ms" << std::endl;
