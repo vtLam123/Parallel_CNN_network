@@ -75,7 +75,8 @@
     "autodiff": "cpp",
     "fft": "cpp",
     "core": "cpp",
-    "random": "cpp"
+    "random": "cpp",
+    "chrono": "cpp"
   },
   "C_Cpp.errorSquiggles": "disabled"
 }
