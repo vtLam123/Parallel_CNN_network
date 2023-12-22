@@ -94,14 +94,14 @@ void Conv_CPU::forward(const Matrix &bottom)
   const int K = height_kernel; // Assuming width_kernel is also K
 
   std::cout << "Conv-CPU==" << std::endl;
-  std::cout << *x << std::endl;
-  std::cout << *y << std::endl;
-  std::cout << *k << std::endl;
-  std::cout << *b << std::endl;
-  std::cout << B << std::endl;
-  std::cout << M << std::endl;
-  std::cout << C << std::endl;
-  std::cout << K << std::endl;
+  // std::cout << *x << std::endl;
+  // std::cout << *y << std::endl;
+  // std::cout << *k << std::endl;
+  // std::cout << *b << std::endl;
+  // std::cout << B << std::endl;
+  // std::cout << M << std::endl;
+  // std::cout << C << std::endl;
+  // std::cout << K << std::endl;
   // Start timer
   auto start_time = std::chrono::high_resolution_clock::now();
 
