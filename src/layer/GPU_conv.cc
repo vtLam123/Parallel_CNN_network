@@ -77,7 +77,7 @@ void Conv_GPU::forward(const Matrix &bottom)
     std::cout << "Conv-GPU==" << std::endl;
 
     // Launch marker kernel to aid with student function timing
-    gpuUtils.insert_pre_barrier_kernel();
+    GPU_Utils.insert_pre_barrier_kernel();
 
     // Start layer timer
     auto start_time_layer = std::chrono::high_resolution_clock::now();
