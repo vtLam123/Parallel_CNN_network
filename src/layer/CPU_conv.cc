@@ -93,7 +93,7 @@ void Conv_CPU::forward(const Matrix &bottom)
   const int C = channel_in;
   const int K = height_kernel; // Assuming width_kernel is also K
 
-  std::cout << "Conv-CPU==" << std::endl;
+  // std::cout << "Conv-CPU==" << std::endl;
   // std::cout << *x << std::endl;
   // std::cout << *y << std::endl;
   // std::cout << *k << std::endl;
