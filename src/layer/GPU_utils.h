@@ -8,9 +8,9 @@ public:
     /* For creating a dummy kernel call so that we can distinguish between kernels launched for different layers
      * in the Nsight Compute CLI for measuring per layer Op Times
      */
-    void insert_post_barrier_kernel();
+    extern "C" void insert_post_barrier_kernel();
     // For inserting a marker visible in Nsys so that we can time total student function time
-    void insert_pre_barrier_kernel();
+    extern "C" void insert_pre_barrier_kernel();
 };
 
 #endif

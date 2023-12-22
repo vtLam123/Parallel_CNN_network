@@ -1,18 +1,18 @@
 #include "GPU_utils.h"
 
-__global__ void do_not_remove_this_kernel()
+extern "C" __global__ void do_not_remove_this_kernel()
 {
     int tx = threadIdx.x;
     tx = tx + 1;
 }
 
-__global__ void prefn_marker_kernel()
+extern "C" __global__ void prefn_marker_kernel()
 {
     int tx = threadIdx.x;
     tx = tx + 1;
 }
 
-__host__ void GPU_Utils::insert_post_barrier_kernel()
+extern "C" __host__ void GPU_Utils::insert_post_barrier_kernel()
 {
 
     dim3 GridDim(1, 1, 1);
@@ -21,7 +21,7 @@ __host__ void GPU_Utils::insert_post_barrier_kernel()
     cudaDeviceSynchronize();
 }
 
-__host__ void GPU_Utils::insert_pre_barrier_kernel()
+extern "C" __host__ void GPU_Utils::insert_pre_barrier_kernel()
 {
 
     int *devicePtr;

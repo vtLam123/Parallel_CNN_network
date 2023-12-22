@@ -187,7 +187,7 @@ __host__ void GPUInterface::conv_forward_gpu_prolog(const float *host_y, const f
     // }
 }
 
-__host__ void GPUInterface::conv_forward_gpu(float *device_y, const float *device_x, const float *device_k, const int B, const int M, const int C, const int H, const int W, const int K)
+extern "C" __host__ void GPUInterface::conv_forward_gpu(float *device_y, const float *device_x, const float *device_k, const int B, const int M, const int C, const int H, const int W, const int K)
 {
     // Set the kernel dimensions and call the kernel
 

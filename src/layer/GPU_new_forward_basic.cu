@@ -156,7 +156,7 @@ __global__ void conv_forward_kernel_c3(float *__restrict__ y, const float *__res
 #undef k4d
 }
 
-__host__ void GPUInterface::conv_forward_gpu_prolog(const float *host_y, const float *host_x, const float *host_k, float **device_y_ptr, float **device_x_ptr, float **device_k_ptr, const int B, const int M, const int C, const int H, const int W, const int K)
+extern "C" __host__ void GPUInterface::conv_forward_gpu_prolog(const float *host_y, const float *host_x, const float *host_k, float **device_y_ptr, float **device_x_ptr, float **device_k_ptr, const int B, const int M, const int C, const int H, const int W, const int K)
 {
     // Allocate memory and copy over the relevant data structures to the GPU
 
@@ -187,7 +187,7 @@ __host__ void GPUInterface::conv_forward_gpu_prolog(const float *host_y, const f
     // }
 }
 
-__host__ void GPUInterface::conv_forward_gpu(float *device_y, const float *device_x, const float *device_k, const int B, const int M, const int C, const int H, const int W, const int K)
+extern "C" __host__ void GPUInterface::conv_forward_gpu(float *device_y, const float *device_x, const float *device_k, const int B, const int M, const int C, const int H, const int W, const int K)
 {
     // Set the kernel dimensions and call the kernel
 
@@ -232,7 +232,7 @@ __host__ void GPUInterface::conv_forward_gpu(float *device_y, const float *devic
     }
 }
 
-__host__ void GPUInterface::conv_forward_gpu_epilog(float *host_y, float *device_y, float *device_x, float *device_k, const int B, const int M, const int C, const int H, const int W, const int K)
+extern "C" __host__ void GPUInterface::conv_forward_gpu_epilog(float *host_y, float *device_y, float *device_x, float *device_k, const int B, const int M, const int C, const int H, const int W, const int K)
 {
     // Copy the output back to host
 
@@ -249,7 +249,7 @@ __host__ void GPUInterface::conv_forward_gpu_epilog(float *host_y, float *device
     cudaFree(device_k);
 }
 
-__host__ void GPUInterface::get_device_properties()
+extern "C" __host__ void GPUInterface::get_device_properties()
 {
     int deviceCount;
     cudaGetDeviceCount(&deviceCount);
