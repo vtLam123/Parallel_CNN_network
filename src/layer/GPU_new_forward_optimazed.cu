@@ -5,9 +5,9 @@
 #define TILE_WIDTH_C1 16
 #define TILE_WIDTH_C3 12
 
-extern "C" __constant__ float deviceMaskData[3200]; // Allocate biggest size (C3): MxCxKxK = 4x16x7x7 = 3136 ==> 3200
+__constant__ float deviceMaskData[3200]; // Allocate biggest size (C3): MxCxKxK = 4x16x7x7 = 3136 ==> 3200
 
-extern "C" __global__ void conv_forward_kernel_c1(float *__restrict__ y, const float *__restrict__ x, const float *__restrict__ k, const int B, const int M, const int C, const int H, const int W, const int K)
+__global__ void conv_forward_kernel_c1(float *__restrict__ y, const float *__restrict__ x, const float *__restrict__ k, const int B, const int M, const int C, const int H, const int W, const int K)
 {
 
     extern __shared__ float X_ds[];
@@ -81,7 +81,7 @@ extern "C" __global__ void conv_forward_kernel_c1(float *__restrict__ y, const f
 #undef k4d
 }
 
-extern "C" __global__ void conv_forward_kernel_c3(float *__restrict__ y, const float *__restrict__ x, const float *__restrict__ k, const int B, const int M, const int C, const int H, const int W, const int K)
+__global__ void conv_forward_kernel_c3(float *__restrict__ y, const float *__restrict__ x, const float *__restrict__ k, const int B, const int M, const int C, const int H, const int W, const int K)
 {
 
     extern __shared__ float X_ds[];
@@ -156,7 +156,7 @@ extern "C" __global__ void conv_forward_kernel_c3(float *__restrict__ y, const f
 #undef k4d
 }
 
-extern "C" __host__ void GPUInterface::conv_forward_gpu_prolog(const float *host_y, const float *host_x, const float *host_k, float **device_y_ptr, float **device_x_ptr, float **device_k_ptr, const int B, const int M, const int C, const int H, const int W, const int K)
+__host__ void GPUInterface::conv_forward_gpu_prolog(const float *host_y, const float *host_x, const float *host_k, float **device_y_ptr, float **device_x_ptr, float **device_k_ptr, const int B, const int M, const int C, const int H, const int W, const int K)
 {
     // Allocate memory and copy over the relevant data structures to the GPU
 
@@ -232,7 +232,7 @@ extern "C" __host__ void GPUInterface::conv_forward_gpu(float *device_y, const f
     }
 }
 
-extern "C" __host__ void GPUInterface::conv_forward_gpu_epilog(float *host_y, float *device_y, float *device_x, float *device_k, const int B, const int M, const int C, const int H, const int W, const int K)
+__host__ void GPUInterface::conv_forward_gpu_epilog(float *host_y, float *device_y, float *device_x, float *device_k, const int B, const int M, const int C, const int H, const int W, const int K)
 {
     // Copy the output back to host
 
@@ -249,7 +249,7 @@ extern "C" __host__ void GPUInterface::conv_forward_gpu_epilog(float *host_y, fl
     cudaFree(device_k);
 }
 
-extern "C" __host__ void GPUInterface::get_device_properties()
+__host__ void GPUInterface::get_device_properties()
 {
     int deviceCount;
     cudaGetDeviceCount(&deviceCount);

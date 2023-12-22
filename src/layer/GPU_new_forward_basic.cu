@@ -5,9 +5,9 @@
 #define TILE_WIDTH_C1 16
 #define TILE_WIDTH_C3 12
 
-extern "C" __constant__ float deviceMaskData[3200]; // Allocate biggest size (C3): MxCxKxK = 4x16x7x7 = 3136 ==> 3200
+__constant__ float deviceMaskData[3200]; // Allocate biggest size (C3): MxCxKxK = 4x16x7x7 = 3136 ==> 3200
 
-extern "C" __global__ void conv_forward_kernel_c1(float *__restrict__ y, const float *__restrict__ x, const float *__restrict__ k, const int B, const int M, const int C, const int H, const int W, const int K)
+__global__ void conv_forward_kernel_c1(float *__restrict__ y, const float *__restrict__ x, const float *__restrict__ k, const int B, const int M, const int C, const int H, const int W, const int K)
 {
 
     extern __shared__ float X_ds[];
@@ -81,7 +81,7 @@ extern "C" __global__ void conv_forward_kernel_c1(float *__restrict__ y, const f
 #undef k4d
 }
 
-extern "C" __global__ void conv_forward_kernel_c3(float *__restrict__ y, const float *__restrict__ x, const float *__restrict__ k, const int B, const int M, const int C, const int H, const int W, const int K)
+__global__ void conv_forward_kernel_c3(float *__restrict__ y, const float *__restrict__ x, const float *__restrict__ k, const int B, const int M, const int C, const int H, const int W, const int K)
 {
 
     extern __shared__ float X_ds[];
