@@ -1,4 +1,4 @@
-#include "./new_layer/GPU_utils.h"
+#include "GPU_utils.h"
 
 __global__ void do_not_remove_this_kernel()
 {
