@@ -1,4 +1,4 @@
-#include "GPU_forward_conv.h"
+#include "./new_layer/GPU_forward_conv.h"
 
 char *GPU_Support::concatStr(const char *s1, const char *s2)
 {
