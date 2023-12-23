@@ -4,7 +4,7 @@
 #include <vector>
 #include <chrono>
 #include "../layer.h"
-#include "./CPU_forward_conv.h"
+#include "./new_layer/CPU_forward_conv.h"
 
 class Conv_CPU : public Layer
 {
