@@ -1,6 +1,6 @@
-src/layer/new_layer/GPU_forward_conv.o
-src/layer/new_layer/GPU_new_forward_basic.o
-src/layer/new_layer/GPU_utils.cu.o
+src/layer/GPU_forward_conv.o
+src/layer/GPU_new_forward_basic.o
+src/layer/GPU_utils.cu.o
 
 src/layer/ave_pooling.o
 src/layer/conv.o
