@@ -22,7 +22,6 @@ void Conv_CPU::forward(const Matrix &bottom)
 {
   int n_sample = bottom.cols();
   top.resize(height_out * width_out * channel_out, n_sample);
-  data_cols.resize(n_sample);
   float *x = (float *)bottom.data();
   float *y = (float *)top.data();
   float *k = (float *)weight.data();
@@ -33,6 +32,7 @@ void Conv_CPU::forward(const Matrix &bottom)
   const int C = channel_in;
   const int K = height_kernel; // Assuming width_kernel is also K
 
+  std::cout << "Conv-CPU==" << std::endl;
   // Start timer
   auto start_time = std::chrono::high_resolution_clock::now();
 
