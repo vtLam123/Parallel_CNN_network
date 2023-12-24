@@ -24,6 +24,7 @@ mnist.o: src/mnist.cc
 layer: src/layer/conv.cc src/layer/ave_pooling.cc src/layer/fully_connected.cc src/layer/max_pooling.cc src/layer/relu.cc src/layer/sigmoid.cc src/layer/softmax.cc 
 	nvcc --compile src/layer/ave_pooling.cc -o src/layer/ave_pooling.o -I./ -L/usr/local/cuda/lib64 -lcudart
 	nvcc --compile src/layer/conv.cc -o src/layer/conv.o -I./ -L/usr/local/cuda/lib64 -lcudart
+	nvcc --compile src/layer/CPU_conv.cc -o src/layer/CPU_conv.o -I./ -L/usr/local/cuda/lib64 -lcudart
 	nvcc --compile src/layer/GPU_conv.cc -o src/layer/GPU_conv.o -I./ -L/usr/local/cuda/lib64 -lcudart
 	nvcc --compile src/layer/fully_connected.cc -o src/layer/fully_connected.o -I./ -L/usr/local/cuda/lib64 -lcudart
 	nvcc --compile src/layer/max_pooling.cc -o src/layer/max_pooling.o -I./ -L/usr/local/cuda/lib64 -lcudart
