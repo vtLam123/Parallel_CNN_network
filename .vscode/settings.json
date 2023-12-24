@@ -78,6 +78,11 @@
     "random": "cpp",
     "chrono": "cpp"
   },
+<<<<<<< HEAD
   "C_Cpp.errorSquiggles": "disabled",
   "cmake.sourceDirectory": "/Users/volam/Desktop/meterial/Parallel_CNN_network/Eigen"
 }
+=======
+  "C_Cpp.errorSquiggles": "disabled"
+}
+>>>>>>> parent of b2d417d (change to GPU)
