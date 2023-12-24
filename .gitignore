@@ -1,4 +1,3 @@
-# src/layer/GPU_forward_conv.o
 # src/layer/GPU_new_forward_basic.o
 # src/layer/GPU_utils.o
 
