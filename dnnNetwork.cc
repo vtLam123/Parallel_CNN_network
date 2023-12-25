@@ -4,9 +4,9 @@ Network dnnNetwork_CPU()
 {
     Network dnn;
 
-    Layer *conv1 = new Conv(1, 28, 28, 6, 5, 5);
+    Layer *conv1 = new Conv_CPU(1, 28, 28, 6, 5, 5);
     Layer *pool1 = new MaxPooling(6, 24, 24, 2, 2, 2);
-    Layer *conv2 = new Conv(6, 12, 12, 16, 5, 5);
+    Layer *conv2 = new Conv_CPU(6, 12, 12, 16, 5, 5);
     Layer *pool2 = new MaxPooling(16, 8, 8, 2, 2, 2);
     Layer *fc1 = new FullyConnected(pool2->output_dim(), 120);
     Layer *fc2 = new FullyConnected(120, 84);
