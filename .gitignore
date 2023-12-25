@@ -1,0 +1,23 @@
+./vscode
+# src/layer/GPU_new_forward_basic.o
+# src/layer/GPU_utils.o
+
+# src/layer/ave_pooling.o
+# src/layer/conv.o
+# src/layer/fully_connected.o
+# src/layer/GPU_conv.o
+# src/layer/max_pooling.o
+# src/layer/relu.o
+# src/layer/sigmoid.o
+# src/layer/softmax.o
+
+# src/loss/cross_entropy_loss.o
+# src/loss/mse_loss.o
+
+# src/optimizer/sgd.o
+
+# src/mnist.o
+# src/network.o
+# dnnNetwork.o
+# main.o
+# # this is gitignore file
