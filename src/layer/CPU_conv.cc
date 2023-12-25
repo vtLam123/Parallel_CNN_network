@@ -32,16 +32,16 @@ void Conv_CPU::forward(const Matrix &bottom)
   const int C = channel_in;
   const int K = height_kernel; // Assuming width_kernel is also K
 
-  std::cout << "Conv-CPU==" << std::endl;
-  // Start timer
-  auto start_time = std::chrono::high_resolution_clock::now();
+  // std::cout << "Conv-CPU==" << std::endl;
+  // // Start timer
+  // auto start_time = std::chrono::high_resolution_clock::now();
 
   conv_forward_cpu(y, x, k, B, M, C, height_in, width_in, K);
 
-  // Stop timer
-  auto end_time = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<float, std::milli> duration = (end_time - start_time);
-  std::cout << "Op Time: " << duration.count() << " ms" << std::endl;
+  // // Stop timer
+  // auto end_time = std::chrono::high_resolution_clock::now();
+  // std::chrono::duration<float, std::milli> duration = (end_time - start_time);
+  // std::cout << "Op Time: " << duration.count() << " ms" << std::endl;
 }
 
 void Conv_CPU::backward(const Matrix &bottom, const Matrix &grad_top)
