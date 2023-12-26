@@ -62,9 +62,9 @@ void Conv_Custom::forward(const Matrix& bottom) {
   cudaMalloc((void **) &k_d, maskSize);
 
     // Copy Inout data to device
-  cudaMemcpy(*x_d, x, inputSize, cudaMemcpyHostToDevice);
+  cudaMemcpy(x_d, x, inputSize, cudaMemcpyHostToDevice);
     // Copy Mask data to device
-  cudaMemcpy(*k_d, k, maskSize, cudaMemcpyHostToDevice);
+  cudaMemcpy(k_d, k, maskSize, cudaMemcpyHostToDevice);
 
 
   // Start kernel timer
