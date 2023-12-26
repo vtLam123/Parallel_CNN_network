@@ -34,3 +34,5 @@ src\layer\GPU_new_forward_basic.cu
 src\layer\GPU_new_forward.h
 src\layer\GPU_utils.cu
 src\layer\GPU_utils.h
+src\layer\conv-cpu.cc
+src\layer\conv-cpu.h
