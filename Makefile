@@ -20,8 +20,10 @@
 
 # ############################################################################
 
-main: main.o custom
-	nvcc -arch=sm_75 -o main -lm -lcuda -lrt main.o dnnNetwork.o src/network.o src/mnist.o src/layer/*.o src/loss/*.o src/optimizer/*.o -I./ -L/usr/local/cuda/lib64 -lcudart
+# main: main.o custom
+# 	nvcc -arch=sm_75 -o main -lm -lcuda -lrt main.o dnnNetwork.o src/network.o src/mnist.o src/layer/*.o src/loss/*.o src/optimizer/*.o -I./ -L/usr/local/cuda/lib64 -lcudart
+main: main.o dnnNetwork.o network.o mnist.o layer new_layer loss optimizer
+	nvcc -o main -lm -lcuda -lrt main.o dnnNetwork.o src/network.o src/mnist.o src/layer/*.o src/loss/*.o src/optimizer/*.o -I./ -L/usr/local/cuda/lib64 -lcudart
 
 main.o: main.cc
 	nvcc -arch=sm_75 --compile main.cc -I./ -L/usr/local/cuda/lib64 -lcudart
@@ -45,7 +47,7 @@ layer: src/layer/conv.cc src/layer/ave_pooling.cc src/layer/fully_connected.cc s
 	nvcc -arch=sm_75 --compile src/layer/sigmoid.cc -o src/layer/sigmoid.o -I./ -L/usr/local/cuda/lib64 -lcudart
 	nvcc -arch=sm_75 --compile src/layer/softmax.cc -o src/layer/softmax.o -I./ -L/usr/local/cuda/lib64 -lcudart
 
-custom0: 
+custom: 
 	rm -f src/layer/custom/*.o
 #	nvcc -arch=sm_75 --compile src/layer/custom/gpu-support.cu -o src/layer/custom/gpu-support.o -I./ -L/usr/local/cuda/lib64 -lcudart 
 	nvcc -arch=sm_75 --compile src/layer/custom/gpu-new-forward.cu -o src/layer/custom/gpu-new-forward.o -I./ -L/usr/local/cuda/lib64 -lcudart
