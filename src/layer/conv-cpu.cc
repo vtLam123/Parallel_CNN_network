@@ -25,7 +25,7 @@ void Conv_CPU::forward(const Matrix& bottom) {
   float *x = (float*)bottom.data();
   float *y = (float*)top.data();
   float *k = (float*)weight.data();
-  float *b = (float*)bias.data();
+  //float *b = (float*)bias.data();
 
   const int B = n_sample;
   const int M = channel_out;
@@ -36,7 +36,7 @@ void Conv_CPU::forward(const Matrix& bottom) {
   //Start timer
   auto start_time = std::chrono::high_resolution_clock::now();
 
- // conv_forward_cpu(y, x, k, B, M, C, height_in, width_in, K);
+  conv_forward_cpu(y, x, k, B, M, C, height_in, width_in, K);
 
   //Stop timer
   auto end_time = std::chrono::high_resolution_clock::now();
