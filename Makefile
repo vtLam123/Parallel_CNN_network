@@ -6,7 +6,7 @@
 
 ############################################################################
 
-main: main.o dnnNetwork.o network.o mnist.o layer new_layer loss optimizer
+main: main.o dnnNetwork.o network.o mnist.o layer custom loss optimizer
 	nvcc -o main -lm -lcuda -lrt main.o dnnNetwork.o src/network.o src/mnist.o src/layer/*.o src/loss/*.o src/optimizer/*.o -I./ -L/usr/local/cuda/lib64 -lcudart
 
 main.o: main.cc
