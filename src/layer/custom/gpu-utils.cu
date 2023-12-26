@@ -1,4 +1,4 @@
-#include "gpu-utils.cuh"
+#include "gpu-utils.h"
 
 __global__ void do_not_remove_this_kernel() {
     int tx = threadIdx.x;
