@@ -61,28 +61,6 @@ void Conv::forward(const Matrix &bottom)
     int n_sample = bottom.cols();
     top.resize(height_out * width_out * channel_out, n_sample);
     data_cols.resize(n_sample);
-    float *x = (float *)bottom.data();
-    float *y = (float *)top.data();
-    float *k = (float *)weight.data();
-    float *b = (float *)bias.data();
-
-    const int B = n_sample;
-    const int M = channel_out;
-    const int C = channel_in;
-    const int K = height_kernel; // Assuming width_kernel is also K
-
-<<<<<<< HEAD
-=======
-    std::cout << "Conv-CPU==" << std::endl;
-    // std::cout << *x << std::endl;
-    // std::cout << *y << std::endl;
-    // std::cout << *k << std::endl;
-    // std::cout << *b << std::endl;
-    // std::cout << B << std::endl;
-    // std::cout << M << std::endl;
-    // std::cout << C << std::endl;
-    // std::cout << K << std::endl;
->>>>>>> parent of f2a7dc9 (delete cout)
     for (int i = 0; i < n_sample; i++)
     {
         // im2col

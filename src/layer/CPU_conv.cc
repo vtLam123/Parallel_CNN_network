@@ -60,7 +60,6 @@ void Conv_CPU::forward(const Matrix &bottom)
 {
   int n_sample = bottom.cols();
   top.resize(height_out * width_out * channel_out, n_sample);
-  data_cols.resize(n_sample);
   float *x = (float *)bottom.data();
   float *y = (float *)top.data();
   float *k = (float *)weight.data();
@@ -71,29 +70,16 @@ void Conv_CPU::forward(const Matrix &bottom)
   const int C = channel_in;
   const int K = height_kernel; // Assuming width_kernel is also K
 
-<<<<<<< HEAD
-=======
-  std::cout << "Conv_CPU-CPU==" << std::endl;
-  // std::cout << *x << std::endl;
-  // std::cout << *y << std::endl;
-  // std::cout << *k << std::endl;
-  // std::cout << *b << std::endl;
-  // std::cout << B << std::endl;
-  // std::cout << M << std::endl;
-  // std::cout << C << std::endl;
-  // std::cout << K << std::endl;
->>>>>>> parent of f2a7dc9 (delete cout)
-  for (int i = 0; i < n_sample; i++)
-  {
-    // im2col
-    Matrix data_col;
-    im2col(bottom.col(i), data_col);
-    data_cols[i] = data_col;
-    // conv_CPU by product
-    Matrix result = data_col * weight; // result: (hw_out, channel_out)
-    result.rowwise() += bias.transpose();
-    top.col(i) = Eigen::Map<Vector>(result.data(), result.size());
-  }
+  std::cout << "Conv-CPU==" << std::endl;
+  // Start timer
+  auto start_time = std::chrono::high_resolution_clock::now();
+
+  conv_forward_cpu(y, x, k, B, M, C, height_in, width_in, K);
+
+  // Stop timer
+  auto end_time = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<float, std::milli> duration = (end_time - start_time);
+  std::cout << "Op Time: " << duration.count() << " ms" << std::endl;
 }
 
 // col2im, used for grad_bottom
