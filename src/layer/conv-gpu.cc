@@ -35,6 +35,9 @@ void Conv_Custom::forward(const Matrix& bottom) {
   float *x_d;
   float *y_d;
   float *k_d;
+  GPUInterface gpuInterface;
+  GPU_Utils gpuUtils;
+
 
   std::cout<<"Conv-GPU=="<<std::endl;
 

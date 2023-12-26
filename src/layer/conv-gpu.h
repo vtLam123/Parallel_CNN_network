@@ -33,8 +33,8 @@ class Conv_Custom: public Layer {
 
   std::vector<Matrix> data_cols;
 
-  GPUInterface gpuInterface;
-  GPU_Utils gpuUtils;
+//   GPUInterface gpuInterface;
+//   GPU_Utils gpuUtils;
 
   void init();
 
