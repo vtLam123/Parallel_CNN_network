@@ -85,5 +85,5 @@ setup:
 	make loss
 	make optimizer
 
-run: demo
-	./demo
+run: main
+	./main
