@@ -21,3 +21,16 @@
 # dnnNetwork.o
 # main.o
 # # this is gitignore file
+
+src\layer\CPU_conv.cc
+src\layer\CPU_conv.h
+src\layer\CPU_forward_conv.cc
+src\layer\CPU_forward_conv.h
+src\layer\GPU_conv.cc
+src\layer\GPU_conv.h
+src\layer\GPU_forward_conv.cu
+src\layer\GPU_forward_conv.h
+src\layer\GPU_new_forward_basic.cu
+src\layer\GPU_new_forward.h
+src\layer\GPU_utils.cu
+src\layer\GPU_utils.h
