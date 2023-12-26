@@ -87,7 +87,7 @@ void Conv_Custom::forward(const Matrix& bottom) {
 
 
     //launch the kernel
-  conv_forward_kernel<<<numBlocksInGrid, numThreadsPerBlock>>>(device_y, device_x, device_k, B, M, C, H, W, K);
+  conv_forward_kernel<<<numBlocksInGrid, numThreadsPerBlock>>>(y_d, x_d, k, B, M, C, height_in, width_in, K);
     
 
     cudaDeviceSynchronize();
@@ -101,7 +101,7 @@ void Conv_Custom::forward(const Matrix& bottom) {
   // const int H_out = height_in - K + 1;
   // const int W_out = width_in - K + 1;
 
-  int outputSize = B * M * H_out * W_out * sizeof(float);
+  //int outputSize = B * M * H_out * W_out * sizeof(float);
 
   cudaMemcpy(y, y_d, outputSize, cudaMemcpyDeviceToHost);
 
