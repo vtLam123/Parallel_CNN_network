@@ -53,7 +53,7 @@ void Conv_Custom::forward(const Matrix& bottom) {
   const int H_out = height_in - K + 1;
   const int W_out = width_in - K + 1;
 
-  int inputSize  = B * C * H * width_in * sizeof(float);  // input features map is C
+  int inputSize  = B * C * height_in * width_in * sizeof(float);  // input features map is C
   int outputSize = B * M * H_out * W_out * sizeof(float); // output feature map is M
   int maskSize = M * C * K * K * sizeof(float); // C * M filter Maps of size K*K
 
