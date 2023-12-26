@@ -1,5 +1,6 @@
 #ifndef SRC_LAYER_GPU_NEW_FORWARD_H
 #define SRC_LAYER_GPU_NEW_FORWARD_H
+#include "./gpu-utils.h"
 
 class GPUInterface
 {
