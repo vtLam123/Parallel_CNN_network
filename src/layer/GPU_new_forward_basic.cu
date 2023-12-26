@@ -1,156 +1,43 @@
 #include <cmath>
 #include <iostream>
-#include "GPU_new_forward.h"
+#include "gpu-new-forward.h"
 
-#define TILE_WIDTH_C1 16
-#define TILE_WIDTH_C3 12
+#define TILE_WIDTH 16
 
-__constant__ float deviceMaskData[3200]; // Allocate biggest size (C3): MxCxKxK = 4x16x7x7 = 3136 ==> 3200
-
-__global__ void conv_forward_kernel_c1(float *__restrict__ y, const float *__restrict__ x, const float *__restrict__ k, const int B, const int M, const int C, const int H, const int W, const int K)
+__global__ void conv_forward_kernel(float *y, const float *x, const float *k, const int B, const int M, const int C, const int H, const int W, const int K)
 {
-
-    extern __shared__ float X_ds[];
-    const int INPUT_TILE_WIDTH = TILE_WIDTH_C1 + K - 1;
 
     const int H_out = H - K + 1;
     const int W_out = W - K + 1;
 
-#define y4d(i3, i2, i1, i0) y[(i3) * (M * H_out * W_out) + (i2) * (H_out * W_out) + (i1) * (W_out) + i0]
-#define x4d(i3, i2, i1, i0) x[(i3) * (C * H * W) + (i2) * (H * W) + (i1) * (W) + i0]
-#define k4d(i3, i2, i1, i0) deviceMaskData[(i3) * (C * K * K) + (i2) * (K * K) + (i1) * (K) + i0]
-#define sm3d(i2, i1, i0) X_ds[(i2) * (INPUT_TILE_WIDTH * INPUT_TILE_WIDTH) + (i1) * INPUT_TILE_WIDTH + i0]
-
     // An example use of these macros:
     // float a = y4d(0,0,0,0)
     // y4d(0,0,0,0) = a
-
-    int H_grid = ceil(1.0 * H_out / TILE_WIDTH_C1);
-    int W_grid = ceil(1.0 * W_out / TILE_WIDTH_C1);
-
-    int b = blockIdx.x; // batch number
-    int m = blockIdx.y; // output feature
-
-    int ty = threadIdx.y; // thread ID in the current TILE
-    int tx = threadIdx.x;
-
-    int h = (blockIdx.z / W_grid) * TILE_WIDTH_C1 + ty; // row of the input image matrix
-    int w = (blockIdx.z % W_grid) * TILE_WIDTH_C1 + tx; // col of the input image matrix
-
-    int startOfTile_h = (blockIdx.z / W_grid) * TILE_WIDTH_C1; // row of the input image matrix
-    int startOfTile_w = (blockIdx.z % W_grid) * TILE_WIDTH_C1; // col of the input image matrix
-
-#pragma unroll
-    for (int c = 0; c < C; c++)
-    {
-#pragma unroll
-        for (int i = ty; i < INPUT_TILE_WIDTH; i += TILE_WIDTH_C1)
-        {
-#pragma unroll
-            for (int j = tx; j < INPUT_TILE_WIDTH; j += TILE_WIDTH_C1)
-            {
-                if (startOfTile_h + i < H && startOfTile_w + j < W)
-                {
-                    sm3d(c, i, j) = x4d(b, c, startOfTile_h + i, startOfTile_w + j);
-                }
-            }
-        }
-    }
-
-    // Make sure all threads loaded data into shared memory
-    __syncthreads();
-
-    // compute only within bounds
-    if ((h < H_out) && (w < W_out))
-    {
-        float accum = 0.0f;
-        for (int c = 0; c < C; c++) // sum over all input features
-        {
-#pragma unroll
-            for (int p = 0; p < K; p++) // KxK filter
-#pragma unroll
-                for (int q = 0; q < K; q++)
-                    accum += sm3d(c, p + ty, q + tx) * k4d(m, c, p, q);
-        }
-        y4d(b, m, h, w) = accum;
-    }
-
-#undef sm4d
-#undef y4d
-#undef x4d
-#undef k4d
-}
-
-__global__ void conv_forward_kernel_c3(float *__restrict__ y, const float *__restrict__ x, const float *__restrict__ k, const int B, const int M, const int C, const int H, const int W, const int K)
-{
-
-    extern __shared__ float X_ds[];
-    const int INPUT_TILE_WIDTH = TILE_WIDTH_C3 + K - 1;
-
-    const int H_out = H - K + 1;
-    const int W_out = W - K + 1;
-
 #define y4d(i3, i2, i1, i0) y[(i3) * (M * H_out * W_out) + (i2) * (H_out * W_out) + (i1) * (W_out) + i0]
 #define x4d(i3, i2, i1, i0) x[(i3) * (C * H * W) + (i2) * (H * W) + (i1) * (W) + i0]
-#define k4d(i3, i2, i1, i0) deviceMaskData[(i3) * (C * K * K) + (i2) * (K * K) + (i1) * (K) + i0]
-#define sm3d(i2, i1, i0) X_ds[(i2) * (INPUT_TILE_WIDTH * INPUT_TILE_WIDTH) + (i1) * INPUT_TILE_WIDTH + i0]
+#define k4d(i3, i2, i1, i0) k[(i3) * (C * K * K) + (i2) * (K * K) + (i1) * (K) + i0]
 
-    // An example use of these macros:
-    // float a = y4d(0,0,0,0)
-    // y4d(0,0,0,0) = a
+    int H_grid = ceil(1.0 * H_out / TILE_WIDTH);
+    int W_grid = ceil(1.0 * W_out / TILE_WIDTH);
 
-    int H_grid = ceil(1.0 * H_out / TILE_WIDTH_C3);
-    int W_grid = ceil(1.0 * W_out / TILE_WIDTH_C3);
+    int b = blockIdx.x;                                       // batch number
+    int m = blockIdx.y;                                       // output feature
+    int h = (blockIdx.z / W_grid) * TILE_WIDTH + threadIdx.y; // row of the image matrix
+    int w = (blockIdx.z % W_grid) * TILE_WIDTH + threadIdx.x; // col of the image matrix
 
-    int b = blockIdx.x; // batch number
-    int m = blockIdx.y; // output feature
+    float accum = 0.0f;
 
-    int ty = threadIdx.y; // thread ID in the current TILE
-    int tx = threadIdx.x;
-
-    int h = (blockIdx.z / W_grid) * TILE_WIDTH_C3 + ty; // row of the input image matrix
-    int w = (blockIdx.z % W_grid) * TILE_WIDTH_C3 + tx; // col of the input image matrix'
-
-    int startOfTile_h = (blockIdx.z / W_grid) * TILE_WIDTH_C3; // row of the input image matrix
-    int startOfTile_w = (blockIdx.z % W_grid) * TILE_WIDTH_C3; // col of the input image matrix'
-
-#pragma unroll
-    for (int c = 0; c < C; c++)
+    if (h < H_out && w < W_out)
     {
-#pragma unroll
-        for (int i = ty; i < INPUT_TILE_WIDTH; i += TILE_WIDTH_C3)
-        {
-#pragma unroll
-            for (int j = tx; j < INPUT_TILE_WIDTH; j += TILE_WIDTH_C3)
-            {
-                if (startOfTile_h + i < H && startOfTile_w + j < W)
-                {
-                    sm3d(c, i, j) = x4d(b, c, startOfTile_h + i, startOfTile_w + j);
-                }
-            }
-        }
-    }
-
-    // Make sure all threads loaded data into shared memory
-    __syncthreads();
-
-    // compute only within bounds
-    if ((h < H_out) && (w < W_out))
-    {
-        float accum = 0.0f;
-#pragma unroll
         for (int c = 0; c < C; c++) // sum over all input features
         {
-#pragma unroll
             for (int p = 0; p < K; p++) // KxK filter
-#pragma unroll
                 for (int q = 0; q < K; q++)
-                    accum += sm3d(c, p + ty, q + tx) * k4d(m, c, p, q);
+                    accum += x4d(b, c, h + p, w + q) * k4d(m, c, p, q); // 4 dimensions macro resolve thread index
         }
         y4d(b, m, h, w) = accum;
-    }
+    } // endif (h < H_out && w < W_out)
 
-#undef sm4d
 #undef y4d
 #undef x4d
 #undef k4d
@@ -172,11 +59,12 @@ __host__ void GPUInterface::conv_forward_gpu_prolog(const float *host_y, const f
 
     cudaMalloc((void **)device_x_ptr, inputSize);
     cudaMalloc((void **)device_y_ptr, outputSize);
+    cudaMalloc((void **)device_k_ptr, maskSize);
 
     // Copy Inout data to device
     cudaMemcpy(*device_x_ptr, host_x, inputSize, cudaMemcpyHostToDevice);
     // Copy Mask data to device
-    cudaMemcpyToSymbol(deviceMaskData, host_k, maskSize);
+    cudaMemcpy(*device_k_ptr, host_k, maskSize, cudaMemcpyHostToDevice);
 
     // Useful snippet for error checking
     // cudaError_t error = cudaGetLastError();
@@ -194,42 +82,18 @@ __host__ void GPUInterface::conv_forward_gpu(float *device_y, const float *devic
     const int H_out = H - K + 1;
     const int W_out = W - K + 1;
 
-    if (C == 1)
-    {
-        int H_grid = ceil(1.0 * H_out / TILE_WIDTH_C1);
-        int W_grid = ceil(1.0 * W_out / TILE_WIDTH_C1);
-        int Z = H_grid * W_grid;
+    int H_grid = ceil(1.0 * H_out / TILE_WIDTH);
+    int W_grid = ceil(1.0 * W_out / TILE_WIDTH);
+    int Z = H_grid * W_grid;
 
-        // Block dimensions = #of threads in the block
-        dim3 numThreadsPerBlock(TILE_WIDTH_C1, TILE_WIDTH_C1, 1);
+    // Block dimensions = #of threads in the block
+    dim3 numThreadsPerBlock(TILE_WIDTH, TILE_WIDTH, 1);
 
-        // Error int shmem_size = C * (TILE_WIDTH_C1 -K +1) * (TILE_WIDTH_C1 -K +1) * sizeof(float);
-        int shmem_size = C * (TILE_WIDTH_C1 + K - 1) * (TILE_WIDTH_C1 + K - 1) * sizeof(float);
+    // Grid Dimension = #of Blocks: Batch Size * Num_Output_Features *
+    dim3 numBlocksInGrid(B, M, Z);
 
-        // Grid Dimension = #of Blocks: Batch Size * Num_Output_Features *
-        dim3 numBlocksInGrid(B, M, Z);
-
-        // launch the kernel
-        conv_forward_kernel_c1<<<numBlocksInGrid, numThreadsPerBlock, shmem_size>>>(device_y, device_x, device_k, B, M, C, H, W, K);
-    }
-    else
-    {
-        int H_grid = ceil(1.0 * H_out / TILE_WIDTH_C3);
-        int W_grid = ceil(1.0 * W_out / TILE_WIDTH_C3);
-        int Z = H_grid * W_grid;
-
-        // Block dimensions = #of threads in the block
-        dim3 numThreadsPerBlock(TILE_WIDTH_C3, TILE_WIDTH_C3, 1);
-
-        // Error int shmem_size = C * (TILE_WIDTH_C3 -K +1) * (TILE_WIDTH_C3 -K +1) * sizeof(float);
-        int shmem_size = C * (TILE_WIDTH_C3 + K - 1) * (TILE_WIDTH_C3 + K - 1) * sizeof(float);
-
-        // Grid Dimension = #of Blocks: Batch Size * Num_Output_Features *
-        dim3 numBlocksInGrid(B, M, Z);
-
-        // launch the kernel
-        conv_forward_kernel_c3<<<numBlocksInGrid, numThreadsPerBlock, shmem_size>>>(device_y, device_x, device_k, B, M, C, H, W, K);
-    }
+    // launch the kernel
+    conv_forward_kernel<<<numBlocksInGrid, numThreadsPerBlock>>>(device_y, device_x, device_k, B, M, C, H, W, K);
 }
 
 __host__ void GPUInterface::conv_forward_gpu_epilog(float *host_y, float *device_y, float *device_x, float *device_k, const int B, const int M, const int C, const int H, const int W, const int K)
