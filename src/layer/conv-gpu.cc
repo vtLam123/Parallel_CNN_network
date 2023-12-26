@@ -2,6 +2,8 @@
 #include <math.h>
 #include <iostream>
 
+#define TILE_WIDTH 16
+
 void Conv_Custom::init() {
   height_out = (1 + (height_in - height_kernel + 2 * pad_h) / stride);
   width_out =   (1 + (width_in - width_kernel + 2 * pad_w) / stride);
@@ -62,9 +64,9 @@ void Conv_Custom::forward(const Matrix& bottom) {
   cudaMalloc((void **) k_d, maskSize);
 
     // Copy Inout data to device
-  cudaMemcpy(*x_d, host_x, inputSize, cudaMemcpyHostToDevice);
+  cudaMemcpy(*x_d, x, inputSize, cudaMemcpyHostToDevice);
     // Copy Mask data to device
-  cudaMemcpy(*k_d, host_k, maskSize, cudaMemcpyHostToDevice);
+  cudaMemcpy(*k_d, k, maskSize, cudaMemcpyHostToDevice);
 
 
   // Start kernel timer
@@ -72,8 +74,8 @@ void Conv_Custom::forward(const Matrix& bottom) {
   // Hand off to GPU for computation
   //gpuInterface.conv_forward_gpu(y_d, x_d, k_d, B, M, C, height_in, width_in, K);
   //conv_forward_gpu(float *device_y, const float *device_x, const float *device_k, const int B, const int M, const int C, const int H, const int W, const int K)
-  const int H_out = height_in - K + 1;
-  const int W_out = width_in - K + 1;
+  // const int H_out = height_in - K + 1;
+  // const int W_out = width_in - K + 1;
 
   int H_grid = ceil(1.0*H_out / TILE_WIDTH);
   int W_grid = ceil(1.0*W_out / TILE_WIDTH);
@@ -98,8 +100,8 @@ void Conv_Custom::forward(const Matrix& bottom) {
   //gpuInterface.conv_forward_gpu_epilog(y, y_d, x_d, k_d, B, M, C, height_in, width_in, K);
   //conv_forward_gpu_epilog(float *host_y, float *device_y, float *device_x, float *device_k, const int B, const int M, const int C, const int H, const int W, const int K)
   
-  const int H_out = height_in - K + 1;
-  const int W_out = width_in - K + 1;
+  // const int H_out = height_in - K + 1;
+  // const int W_out = width_in - K + 1;
 
   int outputSize = B * M * H_out * W_out * sizeof(float);
 
