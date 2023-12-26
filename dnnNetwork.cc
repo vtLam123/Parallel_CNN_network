@@ -38,7 +38,7 @@ Network createNetwork_CPU(bool customCPUConv)
     return dnn;
 }
 
-Network dnnNetwork_GPU()
+Network createNetwork_GPU()
 {
     Network dnn;
 
