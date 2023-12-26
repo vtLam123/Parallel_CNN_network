@@ -7,6 +7,7 @@
 #include <cuda_runtime_api.h>
 #include "./GPU_new_forward.h"
 #include "./GPU_utils.h"
+#include "./GPU_forward_conv.h"
 
 class Conv_GPU : public Layer
 {
