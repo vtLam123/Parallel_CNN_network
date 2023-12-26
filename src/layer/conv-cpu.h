@@ -5,6 +5,7 @@
 #include <chrono>
 #include "../layer.h"
 #include "./custom/cpu-new-forward.h"
+#include "./custom/gpu-utils.h"
 
 class Conv_CPU: public Layer {
  private:
