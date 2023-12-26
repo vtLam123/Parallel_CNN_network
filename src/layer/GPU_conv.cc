@@ -2,8 +2,6 @@
 #include <math.h>
 #include <iostream>
 
-#define TILE_WIDTH 16
-
 void Conv_GPU::init()
 {
     height_out = (1 + (height_in - height_kernel + 2 * pad_h) / stride);
@@ -18,42 +16,6 @@ void Conv_GPU::init()
     set_normal_random(bias.data(), bias.size(), 0, 0.01);
     // std::cout << weight.colwise().sum() << std::endl;
     // std::cout << weight.colwise().sum() + bias.transpose() << std::endl;
-}
-
-void Conv_GPU::forward(const Matrix &bottom)
-{
-    int n_sample = bottom.cols();
-    top.resize(height_out * width_out * channel_out, n_sample);
-    float *input_data = (float *)bottom.data();
-    float *output_data = (float *)top.data();
-    float *weight_data = (float *)weight.data();
-
-    const int num_samples = n_sample;
-    const int input_channel = channel_in;
-    const int output_channel = channel_out;
-    const int kernel_height = height_kernel; // Assuming width_kernel is also K
-
-    GPUInterface gpuInterface;
-    std::cout << "Convolution - GPU:" << std::endl;
-
-    // Launch marker kernel to aid with student function timing
-    // gpuInterface.insert_pre_barrier_kernel();
-
-    // Start layer timer
-    GpuTimer timer;
-    timer.Start();
-    gpuInterface.conv_forward_gpu_full(output_data, input_data, weight_data,
-                                       num_samples, output_channel, input_channel,
-                                       height_in, width_in, kernel_height);
-
-    // Stop layer timer
-    timer.Stop();
-    float duration_layer = timer.Elapsed();
-
-    // Launch barrier kernel to aid with timing with nsight-compute
-    // gpuInterface.insert_post_barrier_kernel();
-
-    std::cout << "\t - Layer Time: " << duration_layer << " ms" << std::endl;
 }
 
 // im2col, used for bottom
@@ -94,6 +56,61 @@ void Conv_GPU::im2col(const Vector &image, Matrix &data_col)
     }
 }
 
+void Conv_GPU::forward(const Matrix &bottom)
+{
+    int n_sample = bottom.cols();
+    top.resize(height_out * width_out * channel_out, n_sample);
+    float *x = (float *)bottom.data();
+    float *y = (float *)top.data();
+    float *k = (float *)weight.data();
+    float *b = (float *)bias.data();
+
+    const int B = n_sample;
+    const int M = channel_out;
+    const int C = channel_in;
+    const int K = height_kernel; // Assuming width_kernel is also K
+
+    float *x_d;
+    float *y_d;
+    float *k_d;
+
+    std::cout << "Conv-GPU==" << std::endl;
+
+    // Launch marker kernel to aid with student function timing
+    gpuUtils.insert_pre_barrier_kernel();
+
+    // Start layer timer
+    auto start_time_layer = std::chrono::high_resolution_clock::now();
+    // Data transfer CPU to GPU
+    gpuInterface.conv_forward_gpu_prolog(y, x, k, &y_d, &x_d, &k_d, B, M, C, height_in, width_in, K);
+
+    // Start kernel timer
+    auto start_time_kernel = std::chrono::high_resolution_clock::now();
+    // Hand off to GPU for computation
+    gpuInterface.conv_forward_gpu(y_d, x_d, k_d, B, M, C, height_in, width_in, K);
+    cudaDeviceSynchronize();
+    // Stop kernel timer
+    auto end_time_kernel = std::chrono::high_resolution_clock::now();
+
+    // Data transfer GPU to CPU
+    gpuInterface.conv_forward_gpu_epilog(y, y_d, x_d, k_d, B, M, C, height_in, width_in, K);
+
+    // Stop layer timer
+    auto end_time_layer = std::chrono::high_resolution_clock::now();
+
+    // Launch barrier kernel to aid with timing with nsight-compute
+    gpuUtils.insert_post_barrier_kernel();
+
+    std::chrono::duration<float, std::milli> duration_layer = (end_time_layer - start_time_layer);
+    std::cout << "Layer Time: " << duration_layer.count() << " ms" << std::endl;
+
+    std::chrono::duration<float, std::milli> duration_kernel = (end_time_kernel - start_time_kernel);
+    std::cout << "Op Time: " << duration_kernel.count() << " ms" << std::endl;
+}
+
+// col2im, used for grad_bottom
+// data_col size: Matrix (hw_out, hw_kernel * channel_in)
+// image size: Vector (height_in * width_in * channel_in)
 void Conv_GPU::col2im(const Matrix &data_col, Vector &image)
 {
     int hw_in = height_in * width_in;
