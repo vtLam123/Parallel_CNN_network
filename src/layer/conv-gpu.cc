@@ -37,8 +37,6 @@ void Conv_Custom::forward(const Matrix& bottom) {
   float *x_d;
   float *y_d;
   float *k_d;
-  GPUInterface gpuInterface;
-  GPU_Utils gpuUtils;
 
 
   std::cout<<"Conv-GPU=="<<std::endl;
@@ -59,9 +57,9 @@ void Conv_Custom::forward(const Matrix& bottom) {
   int outputSize = B * M * H_out * W_out * sizeof(float); // output feature map is M
   int maskSize = M * C * K * K * sizeof(float); // C * M filter Maps of size K*K
 
-  cudaMalloc((void **) x_d, inputSize);
-  cudaMalloc((void **) y_d, outputSize);
-  cudaMalloc((void **) k_d, maskSize);
+  cudaMalloc((void **) &x_d, inputSize);
+  cudaMalloc((void **) &y_d, outputSize);
+  cudaMalloc((void **) &k_d, maskSize);
 
     // Copy Inout data to device
   cudaMemcpy(*x_d, x, inputSize, cudaMemcpyHostToDevice);

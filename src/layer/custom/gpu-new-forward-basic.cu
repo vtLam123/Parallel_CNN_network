@@ -72,15 +72,6 @@ __host__ void GPUInterface::conv_forward_gpu_prolog(const float *host_y, const f
     cudaMemcpy(*device_x_ptr, host_x, inputSize, cudaMemcpyHostToDevice);
     // Copy Mask data to device
     cudaMemcpy(*device_k_ptr, host_k, maskSize, cudaMemcpyHostToDevice);
-
-    // Useful snippet for error checking
-    // cudaError_t error = cudaGetLastError();
-    // if(error != cudaSuccess)
-    // {
-    //     std::cout<<"CUDA error: "<<cudaGetErrorString(error)<<std::endl;
-    //     exit(-1);
-    // }
-
 }
 
 
