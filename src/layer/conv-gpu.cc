@@ -1,8 +1,6 @@
-#include "conv-gpu.h"
+#include "conv_cust.h"
 #include <math.h>
 #include <iostream>
-
-#define TILE_WIDTH 16
 
 void Conv_Custom::init() {
   height_out = (1 + (height_in - height_kernel + 2 * pad_h) / stride);
@@ -38,83 +36,32 @@ void Conv_Custom::forward(const Matrix& bottom) {
   float *y_d;
   float *k_d;
 
-
   std::cout<<"Conv-GPU=="<<std::endl;
 
   // Launch marker kernel to aid with student function timing
-  //gpuUtils.insert_pre_barrier_kernel();
+  gpuInterface.insert_pre_barrier_kernel();
   
-   // Start layer timer
-   auto start_time_layer = std::chrono::high_resolution_clock::now();
+  // Start layer timer
+  auto start_time_layer = std::chrono::high_resolution_clock::now();
   // Data transfer CPU to GPU
-  //gpuInterface.conv_forward_gpu_prolog(y, x, k, &y_d, &x_d, &k_d, B, M, C, height_in, width_in, K);
-  //conv_forward_gpu_prolog(const float *host_y, const float *host_x, const float *host_k, float **device_y_ptr, float **device_x_ptr, float **device_k_ptr, const int B, const int M, const int C, const int H, const int W, const int K)
-
-  const int H_out = height_in - K + 1;
-  const int W_out = width_in - K + 1;
-
-  int inputSize  = B * C * height_in * width_in * sizeof(float);  // input features map is C
-  int outputSize = B * M * H_out * W_out * sizeof(float); // output feature map is M
-  int maskSize = M * C * K * K * sizeof(float); // C * M filter Maps of size K*K
-
-  cudaMalloc((void **) &x_d, inputSize);
-  cudaMalloc((void **) &y_d, outputSize);
-  cudaMalloc((void **) &k_d, maskSize);
-
-    // Copy Inout data to device
-  cudaMemcpy(x_d, x, inputSize, cudaMemcpyHostToDevice);
-    // Copy Mask data to device
-  cudaMemcpy(k_d, k, maskSize, cudaMemcpyHostToDevice);
-
-
+  gpuInterface.conv_forward_gpu_prolog(y, x, k, &y_d, &x_d, &k_d, B, M, C, height_in, width_in, K);
+  
   // Start kernel timer
   auto start_time_kernel = std::chrono::high_resolution_clock::now();
   // Hand off to GPU for computation
-  //gpuInterface.conv_forward_gpu(y_d, x_d, k_d, B, M, C, height_in, width_in, K);
-  //conv_forward_gpu(float *device_y, const float *device_x, const float *device_k, const int B, const int M, const int C, const int H, const int W, const int K)
-  // const int H_out = height_in - K + 1;
-  // const int W_out = width_in - K + 1;
-
-  int H_grid = ceil(1.0*H_out / TILE_WIDTH);
-  int W_grid = ceil(1.0*W_out / TILE_WIDTH);
-  int Z = H_grid * W_grid;
-
-    // Block dimensions = #of threads in the block
-  dim3 numThreadsPerBlock(TILE_WIDTH, TILE_WIDTH, 1);
-
-    // Grid Dimension = #of Blocks: Batch Size * Num_Output_Features *
-  dim3 numBlocksInGrid(B, M, Z);
-
-
-    //launch the kernel
-  conv_forward_kernel<<<numBlocksInGrid, numThreadsPerBlock>>>(y_d, x_d, k, B, M, C, height_in, width_in, K);
-    
-
-    cudaDeviceSynchronize();
+  gpuInterface.conv_forward_gpu(y_d, x_d, k_d, B, M, C, height_in, width_in, K);
+  cudaDeviceSynchronize();
   // Stop kernel timer
   auto end_time_kernel = std::chrono::high_resolution_clock::now();
   
   // Data transfer GPU to CPU
-  //gpuInterface.conv_forward_gpu_epilog(y, y_d, x_d, k_d, B, M, C, height_in, width_in, K);
-  //conv_forward_gpu_epilog(float *host_y, float *device_y, float *device_x, float *device_k, const int B, const int M, const int C, const int H, const int W, const int K)
-  
-  // const int H_out = height_in - K + 1;
-  // const int W_out = width_in - K + 1;
+  gpuInterface.conv_forward_gpu_epilog(y, y_d, x_d, k_d, B, M, C, height_in, width_in, K);
 
-  //int outputSize = B * M * H_out * W_out * sizeof(float);
+  // Stop layer timer
+  auto end_time_layer = std::chrono::high_resolution_clock::now();
 
-  cudaMemcpy(y, y_d, outputSize, cudaMemcpyDeviceToHost);
-
-    // Free device memory
-  cudaFree(x_d);
-  cudaFree(y_d);
-  cudaFree(k_d);
-  ///////////////////////////////////////////////////
-  // // Stop layer timer
-   auto end_time_layer = std::chrono::high_resolution_clock::now();
-
-  // // Launch barrier kernel to aid with timing with nsight-compute
-  //gpuUtils.insert_post_barrier_kernel();
+  // Launch barrier kernel to aid with timing with nsight-compute
+  gpuInterface.insert_post_barrier_kernel();
 
   std::chrono::duration<float, std::milli> duration_layer = (end_time_layer-start_time_layer);
   std::cout<<"Layer Time: " << duration_layer.count() << " ms"<<std::endl;

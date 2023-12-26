@@ -115,6 +115,38 @@ __host__ void GPUInterface::conv_forward_gpu_epilog(float *host_y, float *device
     cudaFree(device_k);
 }
 
+__global__ void do_not_remove_this_kernel() {
+    int tx = threadIdx.x;
+    tx = tx + 1;
+}
+
+__global__ void prefn_marker_kernel() {
+    int tx = threadIdx.x;
+    tx = tx + 1;
+}
+
+__host__ void GPUInterface::insert_post_barrier_kernel() {
+    
+    dim3 GridDim(1,1,1);
+    dim3 BlockDim(1,1,1);
+    do_not_remove_this_kernel<<<GridDim, BlockDim>>>();
+    cudaDeviceSynchronize();
+}
+
+__host__ void GPUInterface::insert_pre_barrier_kernel() {
+
+    int* devicePtr;
+    int x = 1;
+
+    cudaMalloc((void**) &devicePtr, sizeof(int));
+    cudaMemcpy(devicePtr, &x, sizeof(int), cudaMemcpyHostToDevice);
+
+    dim3 GridDim(1,1,1);
+    dim3 BlockDim(1,1,1);
+    prefn_marker_kernel<<<GridDim, BlockDim>>>();
+    cudaFree(devicePtr);
+    cudaDeviceSynchronize();
+}
 
 __host__ void GPUInterface::get_device_properties()
 {
