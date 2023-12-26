@@ -1,4 +1,5 @@
 #include "conv-cpu.h"
+#include "src\layer\custom\cpu-new-forward.h"
 #include <math.h>
 #include <iostream>
 
