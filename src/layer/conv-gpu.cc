@@ -59,9 +59,9 @@ void Conv_Custom::forward(const Matrix& bottom) {
   int outputSize = B * M * H_out * W_out * sizeof(float); // output feature map is M
   int maskSize = M * C * K * K * sizeof(float); // C * M filter Maps of size K*K
 
-  cudaMalloc((float **) x_d, inputSize);
-  cudaMalloc((float **) y_d, outputSize);
-  cudaMalloc((float **) k_d, maskSize);
+  cudaMalloc((void **) x_d, inputSize);
+  cudaMalloc((void **) y_d, outputSize);
+  cudaMalloc((void **) k_d, maskSize);
 
     // Copy Inout data to device
   cudaMemcpy(*x_d, x, inputSize, cudaMemcpyHostToDevice);
