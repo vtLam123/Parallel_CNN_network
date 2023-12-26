@@ -2,6 +2,10 @@
 #include <math.h>
 #include <iostream>
 
+#include <cuda_runtime_api.h>
+#include "./custom/gpu-new-forward.h"
+
+
 void Conv_Custom::init() {
   height_out = (1 + (height_in - height_kernel + 2 * pad_h) / stride);
   width_out =   (1 + (width_in - width_kernel + 2 * pad_w) / stride);
