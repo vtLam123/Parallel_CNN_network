@@ -31,5 +31,5 @@
 #include "src/optimizer.h"
 #include "src/optimizer/sgd.h"
 
-Network createNetwork_GPU();
+Network createNetwork_CPU();
 Network createNetwork_GPU();
