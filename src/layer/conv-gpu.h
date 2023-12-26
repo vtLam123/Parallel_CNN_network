@@ -46,7 +46,7 @@ class Conv_Custom: public Layer {
        channel_in(channel_in), height_in(height_in), width_in(width_in),
        channel_out(channel_out), height_kernel(height_kernel),
        width_kernel(width_kernel), stride(stride), pad_w(pad_w), pad_h(pad_h)
-  { init(); 
+  { init(); }
 
   void forward(const Matrix& bottom);
   void backward(const Matrix& bottom, const Matrix& grad_top);
@@ -55,7 +55,6 @@ class Conv_Custom: public Layer {
   std::vector<float> get_parameters() const;
   std::vector<float> get_derivatives() const;
   void set_parameters(const std::vector<float>& param);
-  }
 };
 
 #endif  // SRC_LAYER_CONV_CUST_H_
