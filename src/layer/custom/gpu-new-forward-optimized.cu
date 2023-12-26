@@ -1,6 +1,6 @@
 #include <cmath>
 #include <iostream>
-#include "gpu-new-forward.h"
+#include "gpu-new-forward.cuh"
 
 #define TILE_WIDTH_C1 16
 #define TILE_WIDTH_C3 12
