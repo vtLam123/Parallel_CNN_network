@@ -1,6 +1,6 @@
 #include "dnnNetwork.h"
 
-Network createNetwork_CPU(bool customCPUConv)
+Network createNetwork_CPU()
 {
     Network dnn;
 
