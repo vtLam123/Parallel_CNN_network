@@ -4,7 +4,7 @@
 
 #define TILE_WIDTH 16
 
-void Conv_Custom::init()
+void Conv_GPU::init()
 {
     height_out = (1 + (height_in - height_kernel + 2 * pad_h) / stride);
     width_out = (1 + (width_in - width_kernel + 2 * pad_w) / stride);
@@ -20,7 +20,7 @@ void Conv_Custom::init()
     // std::cout << weight.colwise().sum() + bias.transpose() << std::endl;
 }
 
-void Conv_Custom::forward(const Matrix &bottom)
+void Conv_GPU::forward(const Matrix &bottom)
 {
     int n_sample = bottom.cols();
     top.resize(height_out * width_out * channel_out, n_sample);
@@ -59,7 +59,7 @@ void Conv_Custom::forward(const Matrix &bottom)
 // im2col, used for bottom
 // image size: Vector (height_in * width_in * channel_in)
 // data_col size: Matrix (hw_out, hw_kernel * channel_in)
-void Conv_Custom::im2col(const Vector &image, Matrix &data_col)
+void Conv_GPU::im2col(const Vector &image, Matrix &data_col)
 {
     int hw_in = height_in * width_in;
     int hw_kernel = height_kernel * width_kernel;
@@ -94,7 +94,7 @@ void Conv_Custom::im2col(const Vector &image, Matrix &data_col)
     }
 }
 
-void Conv_Custom::col2im(const Matrix &data_col, Vector &image)
+void Conv_GPU::col2im(const Matrix &data_col, Vector &image)
 {
     int hw_in = height_in * width_in;
     int hw_kernel = height_kernel * width_kernel;
@@ -129,7 +129,7 @@ void Conv_Custom::col2im(const Matrix &data_col, Vector &image)
     }
 }
 
-void Conv_Custom::backward(const Matrix &bottom, const Matrix &grad_top)
+void Conv_GPU::backward(const Matrix &bottom, const Matrix &grad_top)
 {
     int n_sample = bottom.cols();
     grad_weight.setZero();
@@ -153,4 +153,42 @@ void Conv_Custom::backward(const Matrix &bottom, const Matrix &grad_top)
         col2im(grad_bottom_i_col, grad_bottom_i);
         grad_bottom.col(i) = grad_bottom_i;
     }
+}
+
+void Conv_GPU::update(Optimizer &opt)
+{
+    Vector::AlignedMapType weight_vec(weight.data(), weight.size());
+    Vector::AlignedMapType bias_vec(bias.data(), bias.size());
+    Vector::ConstAlignedMapType grad_weight_vec(grad_weight.data(), grad_weight.size());
+    Vector::ConstAlignedMapType grad_bias_vec(grad_bias.data(), grad_bias.size());
+
+    opt.update(weight_vec, grad_weight_vec);
+    opt.update(bias_vec, grad_bias_vec);
+}
+
+std::vector<float> Conv_GPU::get_parameters() const
+{
+    std::vector<float> res(weight.size() + bias.size());
+    // Copy the data of weights and bias to a long vector
+    std::copy(weight.data(), weight.data() + weight.size(), res.begin());
+    std::copy(bias.data(), bias.data() + bias.size(), res.begin() + weight.size());
+    return res;
+}
+
+void Conv_GPU::set_parameters(const std::vector<float> &param)
+{
+    if (static_cast<int>(param.size()) != weight.size() + bias.size())
+        throw std::invalid_argument("Parameter size does not match");
+    std::copy(param.begin(), param.begin() + weight.size(), weight.data());
+    std::copy(param.begin() + weight.size(), param.end(), bias.data());
+}
+
+std::vector<float> Conv_GPU::get_derivatives() const
+{
+    std::vector<float> res(grad_weight.size() + grad_bias.size());
+    // Copy the data of weights and bias to a long vector
+    std::copy(grad_weight.data(), grad_weight.data() + grad_weight.size(), res.begin());
+    std::copy(grad_bias.data(), grad_bias.data() + grad_bias.size(),
+              res.begin() + grad_weight.size());
+    return res;
 }
