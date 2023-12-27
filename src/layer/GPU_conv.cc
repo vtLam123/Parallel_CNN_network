@@ -81,27 +81,27 @@ void Conv_GPU::forward(const Matrix &bottom)
 
     // Start layer timer
     GpuTimer layerTimer, kernelTimer;
-    float layerStart = layerTimer.Start();
+    auto layerStart = layerTimer.Start();
     //auto start_time_layer = std::chrono::high_resolution_clock::now();
     // Data transfer CPU to GPU
     gpuInterface.conv_forward_gpu_prolog(y, x, k, &y_d, &x_d, &k_d, B, M, C, height_in, width_in, K);
 
     // Start kernel timer
     //auto start_time_kernel = std::chrono::high_resolution_clock::now();
-    float kernelStart = kernelTimer.Start();
+    auto kernelStart = kernelTimer.Start();
     // Hand off to GPU for computation
     gpuInterface.conv_forward_gpu(y_d, x_d, k_d, B, M, C, height_in, width_in, K);
     cudaDeviceSynchronize();
     // Stop kernel timer
     //auto end_time_kernel = std::chrono::high_resolution_clock::now();
-    float kernelStop = kernelTimer.Stop();
+    auto kernelStop = kernelTimer.Stop();
 
     // Data transfer GPU to CPU
     gpuInterface.conv_forward_gpu_epilog(y, y_d, x_d, k_d, B, M, C, height_in, width_in, K);
 
     // Stop layer timer
     //auto end_time_layer = std::chrono::high_resolution_clock::now();
-    float layerStop = layerTimer.Stop();
+    auto layerStop = layerTimer.Stop();
     // Launch barrier kernel to aid with timing with nsight-compute
     gpuUtils.insert_post_barrier_kernel();
 
