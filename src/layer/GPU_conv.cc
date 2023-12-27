@@ -76,30 +76,45 @@ void Conv_GPU::forward(const Matrix &bottom)
 
     std::cout << "Conv-GPU==" << std::endl;
 
-    // Launch marker kernel to aid with student function timing
-    gpuUtils.insert_pre_barrier_kernel();
+    // // Launch marker kernel to aid with student function timing
+    // gpuUtils.insert_pre_barrier_kernel();
 
-    // Start layer timer
-    auto start_time_layer = std::chrono::high_resolution_clock::now();
-    // Data transfer CPU to GPU
-    gpuInterface.conv_forward_gpu_prolog(y, x, k, &y_d, &x_d, &k_d, B, M, C, height_in, width_in, K);
+    // // Start layer timer
+    // auto start_time_layer = std::chrono::high_resolution_clock::now();
+    // // Data transfer CPU to GPU
+    // gpuInterface.conv_forward_gpu_prolog(y, x, k, &y_d, &x_d, &k_d, B, M, C, height_in, width_in, K);
 
-    // Start kernel timer
-    auto start_time_kernel = std::chrono::high_resolution_clock::now();
-    // Hand off to GPU for computation
-    gpuInterface.conv_forward_gpu(y_d, x_d, k_d, B, M, C, height_in, width_in, K);
-    cudaDeviceSynchronize();
-    // Stop kernel timer
-    auto end_time_kernel = std::chrono::high_resolution_clock::now();
+    // // Start kernel timer
+    // auto start_time_kernel = std::chrono::high_resolution_clock::now();
+    // // Hand off to GPU for computation
+    // gpuInterface.conv_forward_gpu(y_d, x_d, k_d, B, M, C, height_in, width_in, K);
+    // cudaDeviceSynchronize();
+    // // Stop kernel timer
+    // auto end_time_kernel = std::chrono::high_resolution_clock::now();
 
-    // Data transfer GPU to CPU
-    gpuInterface.conv_forward_gpu_epilog(y, y_d, x_d, k_d, B, M, C, height_in, width_in, K);
+    // // Data transfer GPU to CPU
+    // gpuInterface.conv_forward_gpu_epilog(y, y_d, x_d, k_d, B, M, C, height_in, width_in, K);
+
+    // // Stop layer timer
+    // auto end_time_layer = std::chrono::high_resolution_clock::now();
+
+    // // Launch barrier kernel to aid with timing with nsight-compute
+    // gpuUtils.insert_post_barrier_kernel();
+
+     GpuTimer timer;
+	timer.Start();
+    gpuInterface.conv_forward_gpu_full(output_data, input_data, weight_data,
+                                    num_samples, output_channel, input_channel,
+                                    height_in, width_in, kernel_height);
 
     // Stop layer timer
-    auto end_time_layer = std::chrono::high_resolution_clock::now();
+    timer.Stop();
+	float duration_layer = timer.Elapsed();
 
     // Launch barrier kernel to aid with timing with nsight-compute
-    gpuUtils.insert_post_barrier_kernel();
+    // gpuInterface.insert_post_barrier_kernel();
+    
+    std::cout << "\t - Layer Time: " << duration_layer << " ms" << std::endl;
 
     std::chrono::duration<float, std::milli> duration_layer = (end_time_layer - start_time_layer);
     std::cout << "Layer Time: " << duration_layer.count() << " ms" << std::endl;
