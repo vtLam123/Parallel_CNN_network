@@ -111,6 +111,7 @@ void Conv_GPU::forward(const Matrix &bottom)
 
     std::cout << "\t - Layer Time: " << duration_layer << " ms" << std::endl;
 
+
     // Launch barrier kernel to aid with timing with nsight-compute
     // gpuInterface.insert_post_barrier_kernel();
     

@@ -17,6 +17,10 @@ __global__ void conv_forward_kernel(float *y, const float *x, const float *k, co
 #define x4d(i3, i2, i1, i0) x[(i3) * (C * H * W) + (i2) * (H * W) + (i1) * (W) + i0]
 #define k4d(i3, i2, i1, i0) k[(i3) * (C * K * K) + (i2) * (K * K) + (i1) * (K) + i0]
 
+     // Shared memory for input and kernel
+    __shared__ float ds_x[TILE_WIDTH][TILE_WIDTH];
+    __shared__ float ds_k[TILE_WIDTH][TILE_WIDTH]; 
+
     int H_grid = ceil(1.0 * H_out / TILE_WIDTH);
     int W_grid = ceil(1.0 * W_out / TILE_WIDTH);
 
@@ -27,14 +31,30 @@ __global__ void conv_forward_kernel(float *y, const float *x, const float *k, co
 
     float accum = 0.0f;
 
+    for (int i = 0; i < C; i++) {
+        // Load input and kernel into shared memory
+        ds_x[h][w] = x4d(b, i, h, w);
+        ds_k[h][w] = k4d(m, i, h, w);
+
+        // Synchronize to make sure the tile is loaded
+        __syncthreads();
+
+        // Perform the computation
+        for (int p = 0; p < K; p++)
+            for (int q = 0; q < K; q++)
+                accum += ds_x[h + p][w + q] * ds_k[p][q];
+
+        // Synchronize to make sure the computation is done before loading next tile
+        __syncthreads();
+    }
     if (h < H_out && w < W_out)
     {
-        for (int c = 0; c < C; c++) // sum over all input features
-        {
-            for (int p = 0; p < K; p++) // KxK filter
-                for (int q = 0; q < K; q++)
-                    accum += x4d(b, c, h + p, w + q) * k4d(m, c, p, q); // 4 dimensions macro resolve thread index
-        }
+    //     for (int c = 0; c < C; c++) // sum over all input features
+    //     {
+    //         for (int p = 0; p < K; p++) // KxK filter
+    //             for (int q = 0; q < K; q++)
+    //                 accum += x4d(b, c, h + p, w + q) * k4d(m, c, p, q); // 4 dimensions macro resolve thread index
+    //     }
         y4d(b, m, h, w) = accum;
     } // endif (h < H_out && w < W_out)
 
@@ -138,8 +158,14 @@ __host__ void GPUInterface::conv_forward_gpu_full(float *output_data, const floa
     dim3 num_threads_per_block(TILE_WIDTH, TILE_WIDTH, 1);
     dim3 num_blocks_in_grid(num_samples, output_channel, Z);
 
+    //
+
+    int x_title_width = TILE_WIDTH - 1 * kernel_height;
+
+    size_t shareMemory = sizeof(float) * (x_title_width * x_title_width) + (kernel_height * kernel_height);
+
     // Launch the kernel
-    conv_forward_kernel<<<num_blocks_in_grid, num_threads_per_block>>>(device_output, device_input, device_weight, num_samples, output_channel, input_channel, height_in, width_in, kernel_height);
+    conv_forward_kernel<<<num_blocks_in_grid, num_threads_per_block, shareMemory>>>(device_output, device_input, device_weight, num_samples, output_channel, input_channel, height_in, width_in, kernel_height);
 
     // Copy the output back to host
     cudaMemcpy(output_data, device_output, num_samples * output_channel * height_out * width_out * sizeof(float), cudaMemcpyDeviceToHost);
