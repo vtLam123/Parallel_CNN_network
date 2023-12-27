@@ -9,7 +9,7 @@
 #include "./GPU_utils.h"
 #include "./GPU_forward_conv.h"
 
-class Conv_cust : public Layer
+class Conv_GPU : public Layer
 {
 private:
     const int dim_in;
@@ -41,12 +41,12 @@ private:
     void init();
 
 public:
-    Conv_cust(int channel_in, int height_in, int width_in, int channel_out,
-              int height_kernel, int width_kernel, int stride = 1, int pad_w = 0,
-              int pad_h = 0) : dim_in(channel_in * height_in * width_in),
-                               channel_in(channel_in), height_in(height_in), width_in(width_in),
-                               channel_out(channel_out), height_kernel(height_kernel),
-                               width_kernel(width_kernel), stride(stride), pad_w(pad_w), pad_h(pad_h)
+    Conv_GPU(int channel_in, int height_in, int width_in, int channel_out,
+             int height_kernel, int width_kernel, int stride = 1, int pad_w = 0,
+             int pad_h = 0) : dim_in(channel_in * height_in * width_in),
+                              channel_in(channel_in), height_in(height_in), width_in(width_in),
+                              channel_out(channel_out), height_kernel(height_kernel),
+                              width_kernel(width_kernel), stride(stride), pad_w(pad_w), pad_h(pad_h)
     {
         init();
     }
