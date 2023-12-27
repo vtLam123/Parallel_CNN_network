@@ -33,11 +33,10 @@ layer: src/layer/conv.cc src/layer/ave_pooling.cc src/layer/fully_connected.cc s
 	nvcc --compile src/layer/softmax.cc -o src/layer/softmax.o -I./ -L/usr/local/cuda/lib64 -lcudart
 
 new_layer: 
-	nvcc --compile src/layer/CPU_forward_conv.cc -o src/layer/CPU_forward_conv.o -I./ -L/usr/local/cuda/lib64 -lcudart 
-	# nvcc --compile src/layer/my_GPU.cc -o src/layer/my_GPU.o -I./ -L/usr/local/cuda/lib64 -lcudart 
-	nvcc --compile src/layer/GPU_forward_conv.cu -o src/layer/GPU_forward_conv.o -I./ -L/usr/local/cuda/lib64 -lcudart 
-	nvcc --compile src/layer/GPU_utils.cu -o src/layer/GPU_utils.o -I./ -L/usr/local/cuda/lib64 -lcudart 
-	nvcc --compile src/layer/GPU_new_forward_basic.cu -o src/layer/GPU_new_forward_basic.o -I./ -L/usr/local/cuda/lib64 -lcudart 
+	nvcc --compile src/layer/new_layer/CPU_forward_conv.cc -o src/layer/new_layer/CPU_forward_conv.o -I./ -L/usr/local/cuda/lib64 -lcudart 
+	nvcc --compile src/layer/new_layer/GPU_forward_conv.cu -o src/layer/new_layer/GPU_forward_conv.o -I./ -L/usr/local/cuda/lib64 -lcudart 
+	nvcc --compile src/layer/new_layer/GPU_utils.cu -o src/layer/new_layer/GPU_utils.o -I./ -L/usr/local/cuda/lib64 -lcudart 
+	nvcc --compile src/layer/new_layer/GPU_new_forward_basic.cu -o src/layer/new_layer/GPU_new_forward_basic.o -I./ -L/usr/local/cuda/lib64 -lcudart 
 	
 
 loss: src/loss/cross_entropy_loss.cc src/loss/mse_loss.cc
