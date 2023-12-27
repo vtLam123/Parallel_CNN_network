@@ -1,5 +1,5 @@
-#ifndef SRC_LAYER_CONV_H_
-#define SRC_LAYER_CONV_H_
+#ifndef SRC_LAYER_CONV_MY_GPU_H_
+#define SRC_LAYER_CONV_MY_GPU_H_
 
 #include <vector>
 #include "../layer.h"
@@ -54,4 +54,4 @@ public:
     void set_parameters(const std::vector<float> &param);
 };
 
-#endif // SRC_LAYER_CONV_H_
+#endif // SRC_LAYER_CONV_MY_GPU_H_
