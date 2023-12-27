@@ -114,11 +114,11 @@ __host__ void GPUInterface::conv_forward_gpu(float *device_y, const float *devic
 
     int x_title_width = TILE_WIDTH - 1 * K;
 
-    size_t shareMemory = sizeof(float) * (x_title_width * x_title_width + K * K);
+    size_t share_size = sizeof(float) * (x_title_width * x_title_width + K * K);
 
 
     // launch the kernel
-    conv_forward_kernel<<<numBlocksInGrid, numThreadsPerBlock>>>(device_y, device_x, device_k, B, M, C, H, W, K);
+    conv_forward_kernel<<<numBlocksInGrid, numThreadsPerBlock, share_size>>>(device_y, device_x, device_k, B, M, C, H, W, K);
 }
 
 __host__ void GPUInterface::conv_forward_gpu_epilog(float *host_y, float *device_y, float *device_x, float *device_k, const int B, const int M, const int C, const int H, const int W, const int K)
