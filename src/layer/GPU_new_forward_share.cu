@@ -112,6 +112,11 @@ __host__ void GPUInterface::conv_forward_gpu(float *device_y, const float *devic
     // Grid Dimension = #of Blocks: Batch Size * Num_Output_Features *
     dim3 numBlocksInGrid(B, M, Z);
 
+    int x_title_width = TILE_WIDTH - 1 * K;
+
+    size_t shareMemory = sizeof(float) * (x_title_width * x_title_width + K * K);
+
+
     // launch the kernel
     conv_forward_kernel<<<numBlocksInGrid, numThreadsPerBlock>>>(device_y, device_x, device_k, B, M, C, H, W, K);
 }
