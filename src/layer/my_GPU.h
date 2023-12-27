@@ -2,7 +2,9 @@
 #define SRC_LAYER_CONV_MY_GPU_H_
 
 #include <vector>
+#include <chrono>
 #include "../layer.h"
+#include <cuda_runtime_api.h>
 
 class Conv_GPU : public Layer
 {
