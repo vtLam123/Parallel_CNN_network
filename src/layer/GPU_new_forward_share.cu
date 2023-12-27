@@ -162,7 +162,7 @@ __host__ void GPUInterface::conv_forward_gpu_full(float *output_data, const floa
 
     int x_title_width = TILE_WIDTH - 1 * kernel_height;
 
-    size_t shareMemory = sizeof(float) * (x_title_width * x_title_width) + (kernel_height * kernel_height);
+    size_t shareMemory = sizeof(float) * (x_title_width * x_title_width + kernel_height * kernel_height);
 
     // Launch the kernel
     conv_forward_kernel<<<num_blocks_in_grid, num_threads_per_block, shareMemory>>>(device_output, device_input, device_weight, num_samples, output_channel, input_channel, height_in, width_in, kernel_height);
