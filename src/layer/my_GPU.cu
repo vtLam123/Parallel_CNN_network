@@ -1,6 +1,8 @@
 #include "my_GPU.h"
-#include <math.h>
-#include <iostream>
+#include <vector>
+#include <chrono>
+#include "../layer.h"
+#include <cuda_runtime_api.h>
 #include <cuda_runtime.h>
 
 void Conv_GPU::init()
