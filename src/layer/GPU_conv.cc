@@ -103,24 +103,22 @@ void Conv_GPU::forward(const Matrix &bottom)
 
      GpuTimer timer;
 	timer.Start();
-    gpuInterface.conv_forward_gpu_full(output_data, input_data, weight_data,
-                                    num_samples, output_channel, input_channel,
-                                    height_in, width_in, kernel_height);
+    gpuInterface.conv_forward_gpu_full(y, x, k, B, M, C, height_in, width_in, K);
 
     // Stop layer timer
     timer.Stop();
 	float duration_layer = timer.Elapsed();
 
+    std::cout << "\t - Layer Time: " << duration_layer << " ms" << std::endl;
+
     // Launch barrier kernel to aid with timing with nsight-compute
     // gpuInterface.insert_post_barrier_kernel();
     
-    std::cout << "\t - Layer Time: " << duration_layer << " ms" << std::endl;
+    // std::chrono::duration<float, std::milli> duration_layer = (end_time_layer - start_time_layer);
+    // std::cout << "Layer Time: " << duration_layer << " ms" << std::endl;
 
-    std::chrono::duration<float, std::milli> duration_layer = (end_time_layer - start_time_layer);
-    std::cout << "Layer Time: " << duration_layer.count() << " ms" << std::endl;
-
-    std::chrono::duration<float, std::milli> duration_kernel = (end_time_kernel - start_time_kernel);
-    std::cout << "Op Time: " << duration_kernel.count() << " ms" << std::endl;
+    // std::chrono::duration<float, std::milli> duration_kernel = (end_time_kernel - start_time_kernel);
+    // std::cout << "Op Time: " << duration_kernel << " ms" << std::endl;
 }
 
 // col2im, used for grad_bottom
