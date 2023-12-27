@@ -55,7 +55,7 @@ struct GpuTimer
     }
 };
 
-class GPU_Support
+class GPU_forward_conv
 {
 public:
     char *concatStr(const char *s1, const char *s2);

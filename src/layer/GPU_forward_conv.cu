@@ -1,6 +1,6 @@
 #include "GPU_forward_conv.h"
 
-char *GPU_Support::concatStr(const char *s1, const char *s2)
+char *GPU_forward_conv::concatStr(const char *s1, const char *s2)
 {
     char *result = (char *)malloc(strlen(s1) + strlen(s2) + 1);
     strcpy(result, s1);
@@ -8,7 +8,7 @@ char *GPU_Support::concatStr(const char *s1, const char *s2)
     return result;
 }
 
-void GPU_Support::printDeviceInfo()
+void GPU_forward_conv::printDeviceInfo()
 {
     cudaDeviceProp devProv;
     CHECK(cudaGetDeviceProperties(&devProv, 0));
