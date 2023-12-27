@@ -2,7 +2,7 @@
 #include <math.h>
 #include <iostream>
 
-void Conv_GPU::init()
+void Conv_cust::init()
 {
     height_out = (1 + (height_in - height_kernel + 2 * pad_h) / stride);
     width_out = (1 + (width_in - width_kernel + 2 * pad_w) / stride);
@@ -21,7 +21,7 @@ void Conv_GPU::init()
 // im2col, used for bottom
 // image size: Vector (height_in * width_in * channel_in)
 // data_col size: Matrix (hw_out, hw_kernel * channel_in)
-void Conv_GPU::im2col(const Vector &image, Matrix &data_col)
+void Conv_cust::im2col(const Vector &image, Matrix &data_col)
 {
     int hw_in = height_in * width_in;
     int hw_kernel = height_kernel * width_kernel;
@@ -56,21 +56,7 @@ void Conv_GPU::im2col(const Vector &image, Matrix &data_col)
     }
 }
 
-__global__ void conv_forward_cuda(float *y, const float *x, const float *k, int B, int M, int C, int H_in, int W_in, int K)
-{
-    // Calculate the global thread ID
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-
-    // Ensure the thread is within the data bounds
-    if (idx < B * M * C * H_in * W_in * K)
-    {
-        // Perform the convolution operation here
-        // This is just a placeholder and will need to be replaced with your actual convolution operation
-        y[idx] = x[idx] * k[idx];
-    }
-}
-
-void Conv_GPU::forward(const Matrix &bottom)
+void Conv_cust::forward(const Matrix &bottom)
 {
     int n_sample = bottom.cols();
     top.resize(height_out * width_out * channel_out, n_sample);
@@ -84,27 +70,48 @@ void Conv_GPU::forward(const Matrix &bottom)
     const int C = channel_in;
     const int K = height_kernel; // Assuming width_kernel is also K
 
+    float *x_d;
+    float *y_d;
+    float *k_d;
+
     std::cout << "Conv-GPU==" << std::endl;
-    // Start timer
-    auto start_time = std::chrono::high_resolution_clock::now();
 
-    // Define the number of threads and blocks
-    int threadsPerBlock = 256;
-    int blocksPerGrid = (B * M * C * H_in * W_in * K + threadsPerBlock - 1) / threadsPerBlock;
+    // Launch marker kernel to aid with student function timing
+    gpuUtils.insert_pre_barrier_kernel();
 
-    // Call the CUDA kernel
-    conv_forward_cuda<<<blocksPerGrid, threadsPerBlock>>>(y, x, k, B, M, C, height_in, width_in, K);
+    // Start layer timer
+    auto start_time_layer = std::chrono::high_resolution_clock::now();
+    // Data transfer CPU to GPU
+    gpuInterface.conv_forward_gpu_prolog(y, x, k, &y_d, &x_d, &k_d, B, M, C, height_in, width_in, K);
 
-    // Stop timer
-    auto end_time = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<float, std::milli> duration = (end_time - start_time);
-    std::cout << "Op Time: " << duration.count() << " ms" << std::endl;
+    // Start kernel timer
+    auto start_time_kernel = std::chrono::high_resolution_clock::now();
+    // Hand off to GPU for computation
+    gpuInterface.conv_forward_gpu(y_d, x_d, k_d, B, M, C, height_in, width_in, K);
+    cudaDeviceSynchronize();
+    // Stop kernel timer
+    auto end_time_kernel = std::chrono::high_resolution_clock::now();
+
+    // Data transfer GPU to CPU
+    gpuInterface.conv_forward_gpu_epilog(y, y_d, x_d, k_d, B, M, C, height_in, width_in, K);
+
+    // Stop layer timer
+    auto end_time_layer = std::chrono::high_resolution_clock::now();
+
+    // Launch barrier kernel to aid with timing with nsight-compute
+    gpuUtils.insert_post_barrier_kernel();
+
+    std::chrono::duration<float, std::milli> duration_layer = (end_time_layer - start_time_layer);
+    std::cout << "Layer Time: " << duration_layer.count() << " ms" << std::endl;
+
+    std::chrono::duration<float, std::milli> duration_kernel = (end_time_kernel - start_time_kernel);
+    std::cout << "Op Time: " << duration_kernel.count() << " ms" << std::endl;
 }
 
 // col2im, used for grad_bottom
 // data_col size: Matrix (hw_out, hw_kernel * channel_in)
 // image size: Vector (height_in * width_in * channel_in)
-void Conv_GPU::col2im(const Matrix &data_col, Vector &image)
+void Conv_cust::col2im(const Matrix &data_col, Vector &image)
 {
     int hw_in = height_in * width_in;
     int hw_kernel = height_kernel * width_kernel;
@@ -139,7 +146,7 @@ void Conv_GPU::col2im(const Matrix &data_col, Vector &image)
     }
 }
 
-void Conv_GPU::backward(const Matrix &bottom, const Matrix &grad_top)
+void Conv_cust::backward(const Matrix &bottom, const Matrix &grad_top)
 {
     int n_sample = bottom.cols();
     grad_weight.setZero();
@@ -165,7 +172,7 @@ void Conv_GPU::backward(const Matrix &bottom, const Matrix &grad_top)
     }
 }
 
-void Conv_GPU::update(Optimizer &opt)
+void Conv_cust::update(Optimizer &opt)
 {
     Vector::AlignedMapType weight_vec(weight.data(), weight.size());
     Vector::AlignedMapType bias_vec(bias.data(), bias.size());
@@ -176,7 +183,7 @@ void Conv_GPU::update(Optimizer &opt)
     opt.update(bias_vec, grad_bias_vec);
 }
 
-std::vector<float> Conv_GPU::get_parameters() const
+std::vector<float> Conv_cust::get_parameters() const
 {
     std::vector<float> res(weight.size() + bias.size());
     // Copy the data of weights and bias to a long vector
@@ -185,7 +192,7 @@ std::vector<float> Conv_GPU::get_parameters() const
     return res;
 }
 
-void Conv_GPU::set_parameters(const std::vector<float> &param)
+void Conv_cust::set_parameters(const std::vector<float> &param)
 {
     if (static_cast<int>(param.size()) != weight.size() + bias.size())
         throw std::invalid_argument("Parameter size does not match");
@@ -193,7 +200,7 @@ void Conv_GPU::set_parameters(const std::vector<float> &param)
     std::copy(param.begin() + weight.size(), param.end(), bias.data());
 }
 
-std::vector<float> Conv_GPU::get_derivatives() const
+std::vector<float> Conv_cust::get_derivatives() const
 {
     std::vector<float> res(grad_weight.size() + grad_bias.size());
     // Copy the data of weights and bias to a long vector

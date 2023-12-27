@@ -5,8 +5,11 @@
 #include <chrono>
 #include "../layer.h"
 #include <cuda_runtime_api.h>
+#include "./GPU_new_forward.h"
+#include "./GPU_utils.h"
+#include "./GPU_forward_conv.h"
 
-class Conv_GPU : public Layer
+class Conv_cust : public Layer
 {
 private:
     const int dim_in;
@@ -32,15 +35,18 @@ private:
 
     std::vector<Matrix> data_cols;
 
+    GPUInterface gpuInterface;
+    GPU_Utils gpuUtils;
+
     void init();
 
 public:
-    Conv_GPU(int channel_in, int height_in, int width_in, int channel_out,
-             int height_kernel, int width_kernel, int stride = 1, int pad_w = 0,
-             int pad_h = 0) : dim_in(channel_in * height_in * width_in),
-                              channel_in(channel_in), height_in(height_in), width_in(width_in),
-                              channel_out(channel_out), height_kernel(height_kernel),
-                              width_kernel(width_kernel), stride(stride), pad_w(pad_w), pad_h(pad_h)
+    Conv_cust(int channel_in, int height_in, int width_in, int channel_out,
+              int height_kernel, int width_kernel, int stride = 1, int pad_w = 0,
+              int pad_h = 0) : dim_in(channel_in * height_in * width_in),
+                               channel_in(channel_in), height_in(height_in), width_in(width_in),
+                               channel_out(channel_out), height_kernel(height_kernel),
+                               width_kernel(width_kernel), stride(stride), pad_w(pad_w), pad_h(pad_h)
     {
         init();
     }
