@@ -18,48 +18,42 @@ void Conv_CPU::init()
   // std::cout << weight.colwise().sum() + bias.transpose() << std::endl;
 }
 
-__global__ void im2col_gpu_kernel(const int n, const float *data_im,
-                                  const int height, const int width, const int ksize,
-                                  const int pad, const int stride, const int height_col, const int width_col,
-                                  float *data_col)
+// Wrapper function for im2col using CUDA
+void im2col_gpu(const float *data_im, const int channels,
+                const int height, const int width, const int ksize, const int pad,
+                const int stride, float *data_col)
 {
-  int index = blockIdx.x * blockDim.x + threadIdx.x;
-  for (; index < n; index += blockDim.x * gridDim.x)
-  {
-    int w_out = index % width_col;
-    int h_index = index / width_col;
-    int h_out = h_index % height_col;
-    int channel_in = h_index / height_col;
-    int channel_out = channel_in * ksize * ksize;
-    int h_in = h_out * stride - pad;
-    int w_in = w_out * stride - pad;
-    float *data_col_ptr = data_col;
-    data_col_ptr += (channel_out * height_col + h_out) * width_col + w_out;
-    const float *data_im_ptr = data_im;
-    data_im_ptr += (channel_in * height + h_in) * width + w_in;
-    for (int i = 0; i < ksize; ++i)
-    {
-      for (int j = 0; j < ksize; ++j)
-      {
-        int h = h_in + i;
-        int w = w_in + j;
-        *data_col_ptr =
-            (h >= 0 && w >= 0 && h < height && w < width) ? data_im_ptr[i * width + j] : 0;
-        data_col_ptr += height_col * width_col;
-      }
-    }
-  }
+  // Compute the dimensions of the output
+  int height_col = (height + 2 * pad - ksize) / stride + 1;
+  int width_col = (width + 2 * pad - ksize) / stride + 1;
+  int num_kernels = channels * height_col * width_col;
+  // Launch the CUDA kernel
+  im2col_kernel<<<(num_kernels + CUDA_NUM_THREADS - 1) / CUDA_NUM_THREADS,
+                  CUDA_NUM_THREADS>>>(
+      num_kernels, data_im, height, width, ksize, pad,
+      stride, height_col, width_col, data_col);
 }
 
-void Conv_GPU::im2col(const Vector &image, Matrix &data_col)
+void Conv_CPU::im2col(const Vector &image, Matrix &data_col)
 {
-  int height_col = (height_in + 2 * pad_h - height_kernel) / stride_h + 1;
-  int width_col = (width_in + 2 * pad_w - width_kernel) / stride_w + 1;
-  int num_kernels = channel_in * height_col * width_col;
-  im2col_gpu_kernel<<<(num_kernels + CUDA_NUM_THREADS - 1) / CUDA_NUM_THREADS,
-                      CUDA_NUM_THREADS>>>(
-      num_kernels, image.data(), height_in, width_in, height_kernel, pad_h,
-      stride_h, height_col, width_col, data_col.data());
+  // Step 1: Initialize GPU variables
+  float *data_im_gpu;
+  float *data_col_gpu;
+  cudaMalloc(&data_im_gpu, image.size() * sizeof(float));
+  cudaMalloc(&data_col_gpu, data_col.size() * sizeof(float));
+
+  // Step 2: Copy data from CPU to GPU
+  cudaMemcpy(data_im_gpu, image.data(), image.size() * sizeof(float), cudaMemcpyHostToDevice);
+
+  // Step 3: Call the GPU function
+  im2col_gpu(data_im_gpu, channel_in, height_in, width_in, height_kernel, width_kernel, stride, pad_w, pad_h, data_col_gpu);
+
+  // Step 4: Copy the result from GPU to CPU
+  cudaMemcpy(data_col.data(), data_col_gpu, data_col.size() * sizeof(float), cudaMemcpyDeviceToHost);
+
+  // Free GPU memory
+  cudaFree(data_im_gpu);
+  cudaFree(data_col_gpu);
 }
 
 void Conv::forward(const Matrix &bottom)

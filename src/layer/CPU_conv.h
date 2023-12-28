@@ -5,6 +5,7 @@
 #include <chrono>
 #include "../layer.h"
 #include "./new_layer/CPU_forward_conv.h"
+#include "./new_layer/My_GPU.h"
 
 class Conv_CPU : public Layer
 {
