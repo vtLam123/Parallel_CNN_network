@@ -25,7 +25,7 @@ layer: src/layer/conv.cc src/layer/ave_pooling.cc src/layer/fully_connected.cc s
 	nvcc --compile src/layer/ave_pooling.cc -o src/layer/ave_pooling.o -I./ -L/usr/local/cuda/lib64 -lcudart
 	nvcc --compile src/layer/conv.cc -o src/layer/conv.o -I./ -L/usr/local/cuda/lib64 -lcudart
 	nvcc --compile src/layer/CPU_conv.cc -o src/layer/CPU_conv.o -I./ -L/usr/local/cuda/lib64 -lcudart
-	nvcc --compile src/layer/GPU_conv.cc -o src/layer/GPU_conv.o -I./ -L/usr/local/cuda/lib64 -lcudart
+	nvcc --compile src/layer/conv_GPU.cc -o src/layer/conv_GPU.o -I./ -L/usr/local/cuda/lib64 -lcudart
 	nvcc --compile src/layer/fully_connected.cc -o src/layer/fully_connected.o -I./ -L/usr/local/cuda/lib64 -lcudart
 	nvcc --compile src/layer/max_pooling.cc -o src/layer/max_pooling.o -I./ -L/usr/local/cuda/lib64 -lcudart
 	nvcc --compile src/layer/relu.cc -o src/layer/relu.o -I./ -L/usr/local/cuda/lib64 -lcudart
@@ -36,7 +36,9 @@ new_layer:
 	nvcc --compile src/layer/CPU_forward_conv.cc -o src/layer/CPU_forward_conv.o -I./ -L/usr/local/cuda/lib64 -lcudart 
 	nvcc --compile src/layer/GPU_forward_conv.cu -o src/layer/GPU_forward_conv.o -I./ -L/usr/local/cuda/lib64 -lcudart 
 	nvcc --compile src/layer/GPU_utils.cu -o src/layer/GPU_utils.o -I./ -L/usr/local/cuda/lib64 -lcudart 
-	nvcc --compile src/layer/GPU_new_forward_basic.cu -o src/layer/GPU_new_forward_basic.o -I./ -L/usr/local/cuda/lib64 -lcudart 
+	nvcc --compile src/layer/gpu.cu -o src/layer/gpu.o -I./ -L/usr/local/cuda/lib64 -lcudart 
+
+##	nvcc --compile src/layer/GPU_new_forward_basic.cu -o src/layer/GPU_new_forward_basic.o -I./ -L/usr/local/cuda/lib64 -lcudart 
 ##	nvcc --compile src/layer/GPU_new_forward_share.cu -o src/layer/GPU_new_forward_share.o -I./ -L/usr/local/cuda/lib64 -lcudart 
 	
 

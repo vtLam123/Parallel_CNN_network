@@ -79,11 +79,16 @@ __global__ void conv_forward_kernel1(const float* input, const float* weight, fl
     }
 }
 
-__host__ void GPUInterface1::conv_forward_gpu1(const float* input, const float* weight, float* output, 
-                                              const int num_filters, const int channels, const int height, const int width, 
-                                              const int kernel_h, const int kernel_w, const int pad_h, const int pad_w, 
-                                              const int stride_h, const int stride_w) {
-    
+void GPUInterface1::im2col_gpu(const float *data_im, const int channels, const int height, const int width, const int kernel_h, const int kernel_w, const int pad_h, const int pad_w, const int stride_h, const int stride_w, float *data_col)
+{
+}
+
+__host__ void GPUInterface1::conv_forward_gpu1(const float *input, const float *weight, float *output,
+                                               const int num_filters, const int channels, const int height, const int width,
+                                               const int kernel_h, const int kernel_w, const int pad_h, const int pad_w,
+                                               const int stride_h, const int stride_w)
+{
+
     int height_col = (height + 2 * pad_h - kernel_h) / stride_h + 1;
     int width_col = (width + 2 * pad_w - kernel_w) / stride_w + 1;
     int num_kernels = num_filters * height_col * width_col;
