@@ -36,10 +36,8 @@ new_layer:
 	nvcc --compile src/layer/CPU_forward_conv.cc -o src/layer/CPU_forward_conv.o -I./ -L/usr/local/cuda/lib64 -lcudart 
 	nvcc --compile src/layer/GPU_forward_conv.cu -o src/layer/GPU_forward_conv.o -I./ -L/usr/local/cuda/lib64 -lcudart 
 	nvcc --compile src/layer/GPU_utils.cu -o src/layer/GPU_utils.o -I./ -L/usr/local/cuda/lib64 -lcudart 
-	nvcc --compile src/layer/gpu.cu -o src/layer/gpu.o -I./ -L/usr/local/cuda/lib64 -lcudart 
-
-##	nvcc --compile src/layer/GPU_new_forward_basic.cu -o src/layer/GPU_new_forward_basic.o -I./ -L/usr/local/cuda/lib64 -lcudart 
-##	nvcc --compile src/layer/GPU_new_forward_share.cu -o src/layer/GPU_new_forward_share.o -I./ -L/usr/local/cuda/lib64 -lcudart 
+	nvcc --compile src/layer/GPU_new_forward_basic.cu -o src/layer/GPU_new_forward_basic.o -I./ -L/usr/local/cuda/lib64 -lcudart 
+	nvcc --compile src/layer/GPU_new_forward_share.cu -o src/layer/GPU_new_forward_share.o -I./ -L/usr/local/cuda/lib64 -lcudart 
 	
 
 loss: src/loss/cross_entropy_loss.cc src/loss/mse_loss.cc
