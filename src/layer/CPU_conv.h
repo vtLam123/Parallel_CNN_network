@@ -6,6 +6,9 @@
 #include "../layer.h"
 #include "./new_layer/CPU_forward_conv.h"
 #include "./new_layer/My_GPU.h"
+#include <cuda_runtime.h>
+
+#define CUDA_NUM_THREADS 1024
 
 class Conv_CPU : public Layer
 {

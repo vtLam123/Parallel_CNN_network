@@ -1,5 +1,6 @@
 #ifndef SRC_LAYER_MY_GPU_H
 #define SRC_LAYER_MY_GPU_H
+#include <cuda_runtime.h>
 
 // // Use this class to define GPU functions that students don't need access to.
 // class GPU_Support

@@ -101,19 +101,19 @@ void Conv_cust::forward(const Matrix &bottom)
     // // Launch barrier kernel to aid with timing with nsight-compute
     // gpuUtils.insert_post_barrier_kernel();
 
-     GpuTimer timer;
-	timer.Start();
+    GpuTimer timer;
+    timer.Start();
     gpuInterface.conv_forward_gpu_full(y, x, k, B, M, C, height_in, width_in, K);
 
     // Stop layer timer
     timer.Stop();
-	float duration_layer = timer.Elapsed();
+    float duration_layer = timer.Elapsed();
 
     std::cout << "\t - Layer Time: " << duration_layer << " ms" << std::endl;
 
     // Launch barrier kernel to aid with timing with nsight-compute
     // gpuInterface.insert_post_barrier_kernel();
-    
+
     // std::chrono::duration<float, std::milli> duration_layer = (end_time_layer - start_time_layer);
     // std::cout << "Layer Time: " << duration_layer << " ms" << std::endl;
 
