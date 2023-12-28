@@ -36,24 +36,23 @@ void im2col_gpu(const float *data_im, const int channels,
 
 void Conv_CPU::im2col(const Vector &image, Matrix &data_col)
 {
-  // Step 1: Initialize GPU variables
-  float *data_im_gpu;
-  float *data_col_gpu;
-  cudaMalloc(&data_im_gpu, image.size() * sizeof(float));
-  cudaMalloc(&data_col_gpu, data_col.size() * sizeof(float));
+  // Allocate GPU memory
+  float *d_image, *d_data_col;
+  cudaMalloc(&d_image, hw_in * channel_in * sizeof(float));
+  cudaMalloc(&d_data_col, hw_out * hw_kernel * channel_in * sizeof(float));
 
-  // Step 2: Copy data from CPU to GPU
-  cudaMemcpy(data_im_gpu, image.data(), image.size() * sizeof(float), cudaMemcpyHostToDevice);
+  // Copy data from CPU to GPU
+  cudaMemcpy(d_image, image.data(), hw_in * channel_in * sizeof(float), cudaMemcpyHostToDevice);
 
-  // Step 3: Call the GPU function
-  im2col_gpu(data_im_gpu, channel_in, height_in, width_in, height_kernel, width_kernel, stride, pad_w, pad_h, data_col_gpu);
+  // Call the kernel
+  im2col_kernel<<<blocks, threads>>>(d_image, d_data_col, height_in, width_in, height_kernel, width_kernel, height_out, width_out, stride, pad_h, pad_w, channel_in);
 
-  // Step 4: Copy the result from GPU to CPU
-  cudaMemcpy(data_col.data(), data_col_gpu, data_col.size() * sizeof(float), cudaMemcpyDeviceToHost);
+  // Copy data from GPU to CPU
+  cudaMemcpy(data_col.data(), d_data_col, hw_out * hw_kernel * channel_in * sizeof(float), cudaMemcpyDeviceToHost);
 
   // Free GPU memory
-  cudaFree(data_im_gpu);
-  cudaFree(data_col_gpu);
+  cudaFree(d_image);
+  cudaFree(d_data_col);
 }
 
 void Conv::forward(const Matrix &bottom)
