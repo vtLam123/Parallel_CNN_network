@@ -1,6 +1,7 @@
 #include "conv.h"
 #include <math.h>
 #include <iostream>
+#include "conv_GPU.h"
 
 void Conv_gpu::init()
 {
@@ -130,6 +131,10 @@ void Conv_gpu::update(Optimizer &opt)
 
     opt.update(weight_vec, grad_weight_vec);
     opt.update(bias_vec, grad_bias_vec);
+}
+
+void Conv_gpu::im2col1(const Vector &image, Matrix &data_col)
+{
 }
 
 std::vector<float> Conv_gpu::get_parameters() const

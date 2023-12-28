@@ -1,6 +1,34 @@
 #include "gpu.h"
 
-void GPUInterface::im2col1(const Vector &image, Matrix &data_col)
+/* 
+// CUDA kernel for im2col
+__global__ void im2col_gpu_kernel(const int n, const float* data_im,
+    const int height, const int width, const int ksize,
+    const int pad, const int stride, const int height_col,
+    const int width_col, float* data_col) {
+    // Implement your CUDA kernel here
+}
+
+// CUDA kernel for forward
+__global__ void forward_gpu_kernel(const int n, const float* data_im,
+    const int height, const int width, const int ksize,
+    const int pad, const int stride, const int height_col,
+    const int width_col, float* data_col) {
+    // Implement your CUDA kernel here
+}
+
+// Then you can call these kernels in your functions
+void Conv::im2col(const Vector &image, Matrix &data_col) {
+    // Call im2col_gpu_kernel
+}
+
+void Conv::forward(const Matrix &bottom) {
+    // Call forward_gpu_kernel
+}
+
+ */
+
+void GPUInterface1::im2col1(const Vector &image, Matrix &data_col)
 {
     int hw_in = height_in * width_in;
     int hw_kernel = height_kernel * width_kernel;
@@ -35,31 +63,3 @@ void GPUInterface::im2col1(const Vector &image, Matrix &data_col)
         }
     }
 }
-
-/* 
-// CUDA kernel for im2col
-__global__ void im2col_gpu_kernel(const int n, const float* data_im,
-    const int height, const int width, const int ksize,
-    const int pad, const int stride, const int height_col,
-    const int width_col, float* data_col) {
-    // Implement your CUDA kernel here
-}
-
-// CUDA kernel for forward
-__global__ void forward_gpu_kernel(const int n, const float* data_im,
-    const int height, const int width, const int ksize,
-    const int pad, const int stride, const int height_col,
-    const int width_col, float* data_col) {
-    // Implement your CUDA kernel here
-}
-
-// Then you can call these kernels in your functions
-void Conv::im2col(const Vector &image, Matrix &data_col) {
-    // Call im2col_gpu_kernel
-}
-
-void Conv::forward(const Matrix &bottom) {
-    // Call forward_gpu_kernel
-}
-
- */
