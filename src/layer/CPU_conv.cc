@@ -18,44 +18,45 @@ void Conv_CPU::init()
   // std::cout << weight.colwise().sum() + bias.transpose() << std::endl;
 }
 
-// Wrapper function for im2col using CUDA
-void im2col_gpu(const float *data_im, const int channels,
-                const int height, const int width, const int ksize, const int pad,
-                const int stride, float *data_col)
-{
-  // Compute the dimensions of the output
-  int height_col = (height + 2 * pad - ksize) / stride + 1;
-  int width_col = (width + 2 * pad - ksize) / stride + 1;
-  int num_kernels = channels * height_col * width_col;
-  // Launch the CUDA kernel
-  im2col_kernel<<<(num_kernels + CUDA_NUM_THREADS - 1) / CUDA_NUM_THREADS,
-                  CUDA_NUM_THREADS>>>(
-      num_kernels, data_im, height, width, ksize, pad,
-      stride, height_col, width_col, data_col);
-}
-
+// im2col, used for bottom
+// image size: Vector (height_in * width_in * channel_in)
+// data_col size: Matrix (hw_out, hw_kernel * channel_in)
 void Conv_CPU::im2col(const Vector &image, Matrix &data_col)
 {
-  // Allocate GPU memory
-  float *d_image, *d_data_col;
-  cudaMalloc(&d_image, hw_in * channel_in * sizeof(float));
-  cudaMalloc(&d_data_col, hw_out * hw_kernel * channel_in * sizeof(float));
-
-  // Copy data from CPU to GPU
-  cudaMemcpy(d_image, image.data(), hw_in * channel_in * sizeof(float), cudaMemcpyHostToDevice);
-
-  // Call the kernel
-  im2col_kernel<<<blocks, threads>>>(d_image, d_data_col, height_in, width_in, height_kernel, width_kernel, height_out, width_out, stride, pad_h, pad_w, channel_in);
-
-  // Copy data from GPU to CPU
-  cudaMemcpy(data_col.data(), d_data_col, hw_out * hw_kernel * channel_in * sizeof(float), cudaMemcpyDeviceToHost);
-
-  // Free GPU memory
-  cudaFree(d_image);
-  cudaFree(d_data_col);
+  int hw_in = height_in * width_in;
+  int hw_kernel = height_kernel * width_kernel;
+  int hw_out = height_out * width_out;
+  // im2col
+  data_col.resize(hw_out, hw_kernel * channel_in);
+  for (int c = 0; c < channel_in; c++)
+  {
+    Vector map = image.block(hw_in * c, 0, hw_in, 1); // c-th channel map
+    for (int i = 0; i < hw_out; i++)
+    {
+      int step_h = i / width_out;
+      int step_w = i % width_out;
+      int start_idx = step_h * width_in * stride + step_w * stride; // left-top idx of window
+      for (int j = 0; j < hw_kernel; j++)
+      {
+        int cur_col = start_idx % width_in + j % width_kernel - pad_w; // col after padding
+        int cur_row = start_idx / width_in + j / width_kernel - pad_h;
+        if (cur_col < 0 || cur_col >= width_in || cur_row < 0 ||
+            cur_row >= height_in)
+        {
+          data_col(i, c * hw_kernel + j) = 0;
+        }
+        else
+        {
+          // int pick_idx = start_idx + (j / width_kernel) * width_in + j % width_kernel;
+          int pick_idx = cur_row * width_in + cur_col;
+          data_col(i, c * hw_kernel + j) = map(pick_idx); // pick which pixel
+        }
+      }
+    }
+  }
 }
 
-void Conv::forward(const Matrix &bottom)
+void Conv_CPU::forward(const Matrix &bottom)
 {
   // Start timer
   auto start_time = std::chrono::high_resolution_clock::now();
