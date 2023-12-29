@@ -1,34 +1,44 @@
 #include "My_GPU.h"
 
-// __global__ void im2col_kernel(const float *image, float *data_col, int height_in, int width_in, int height_kernel, int width_kernel, int height_out, int width_out, int stride, int pad_h, int pad_w, int channel_in)
-// {
-//     int hw_in = height_in * width_in;
-//     int hw_kernel = height_kernel * width_kernel;
-//     int hw_out = height_out * width_out;
+#include <cuda_runtime.h>
 
-//     int idx = blockIdx.x * blockDim.x + threadIdx.x;
-//     if (idx >= hw_out * hw_kernel * channel_in)
-//         return;
+// CUDA kernel for convolution
+__global__ void conv_forward_gpu(float *y, const float *x, const float *k, const int B, const int M, const int C, const int H, const int W, const int K, const int H_out, const int W_out)
+{
+    int b = blockIdx.x;
+    int m = blockIdx.y;
+    int h = threadIdx.x;
+    int w = threadIdx.y;
 
-//     int c = idx / (hw_out * hw_kernel);
-//     idx %= hw_out * hw_kernel;
-//     int i = idx / hw_kernel;
-//     int j = idx % hw_kernel;
+    if (b < B && m < M && h < H_out && w < W_out)
+    {
+        float sum = 0;
+        for (int c = 0; c < C; c++)
+        {
+            for (int p = 0; p < K; p++)
+            {
+                for (int q = 0; q < K; q++)
+                {
+                    int x_index = ((b * C + c) * H + h + p) * W + w + q;
+                    int k_index = ((m * C + c) * K + p) * K + q;
+                    sum += x[x_index] * k[k_index];
+                }
+            }
+        }
+        y[((b * M + m) * H_out + h) * W_out + w] = sum;
+    }
+}
 
-//     int step_h = i / width_out;
-//     int step_w = i % width_out;
-//     int start_idx = step_h * width_in * stride + step_w * stride;
+// Function to call the CUDA kernel
+__host__ void GPUSupport::conv_forward_gpu_caller(float *y, const float *x, const float *k, const int B, const int M, const int C, const int H, const int W, const int K)
+{
+    const int H_out = H - K + 1;
+    const int W_out = W - K + 1;
 
-//     int cur_col = start_idx % width_in + j % width_kernel - pad_w;
-//     int cur_row = start_idx / width_in + j / width_kernel - pad_h;
+    dim3 blocks(B, M);
+    dim3 threads(H_out, W_out);
 
-//     if (cur_col < 0 || cur_col >= width_in || cur_row < 0 || cur_row >= height_in)
-//     {
-//         data_col[idx] = 0;
-//     }
-//     else
-//     {
-//         int pick_idx = cur_row * width_in + cur_col;
-//         data_col[idx] = image[c * hw_in + pick_idx];
-//     }
-// }
+    conv_forward_gpu<<<blocks, threads>>>(y, x, k, B, M, C, H, W, K, H_out, W_out);
+
+    cudaDeviceSynchronize();
+}
