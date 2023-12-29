@@ -61,16 +61,6 @@ void Conv::forward(const Matrix &bottom)
     int n_sample = bottom.cols();
     top.resize(height_out * width_out * channel_out, n_sample);
     data_cols.resize(n_sample);
-    float *x = (float *)bottom.data();
-    float *y = (float *)top.data();
-    float *k = (float *)weight.data();
-    float *b = (float *)bias.data();
-
-    const int B = n_sample;
-    const int M = channel_out;
-    const int C = channel_in;
-    const int K = height_kernel; // Assuming width_kernel is also K
-
     for (int i = 0; i < n_sample; i++)
     {
         // im2col

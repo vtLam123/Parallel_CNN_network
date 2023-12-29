@@ -15,8 +15,8 @@
 
 #include "src/layer.h"
 #include "src/layer/conv.h"
-//#include "src/layer/conv-cpu.h"
-#include "src/layer/conv-gpu.h"
+#include "src/layer/CPU_conv.h"
+#include "src/layer/GPU_conv.h"
 #include "src/layer/fully_connected.h"
 #include "src/layer/ave_pooling.h"
 #include "src/layer/max_pooling.h"
@@ -31,5 +31,5 @@
 #include "src/optimizer.h"
 #include "src/optimizer/sgd.h"
 
-Network dnnNetwork_CPU();
-Network dnnNetwork_GPU();
+Network createNetwork_CPU();
+Network createNetwork_GPU();
