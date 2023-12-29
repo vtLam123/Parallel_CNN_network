@@ -2,7 +2,7 @@
 
 #include <cuda_runtime.h>
 
-// CUDA kernel for convolution
+// CUDA kernel for convolutionssss
 __global__ void conv_forward_gpu(float *y, const float *x, const float *k, const int B, const int M, const int C, const int H, const int W, const int K, const int H_out, const int W_out)
 {
     int b = blockIdx.x;
