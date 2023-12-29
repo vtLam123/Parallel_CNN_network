@@ -92,33 +92,33 @@ void Conv_cust::forward(const Matrix &bottom)
     // // // Stop kernel timer
     // // auto end_time_kernel = std::chrono::high_resolution_clock::now();
 
-    // // Data transfer GPU to CPU
-    // gpuInterface.conv_forward_gpu_epilog(y, y_d, x_d, k_d, B, M, C, height_in, width_in, K);
-
-    // // Stop layer timer
-    // auto end_time_layer = std::chrono::high_resolution_clock::now();
-
-    // // Launch barrier kernel to aid with timing with nsight-compute
-    // gpuUtils.insert_post_barrier_kernel();
-
-    GpuTimer timer;
-    timer.Start();
-    my_GPU.conv_forward_gpu_caller(y, x, k, B, M, C, height_in, width_in, K);
+    // Data transfer GPU to CPU
+    gpuInterface.conv_forward_gpu_epilog(y, y_d, x_d, k_d, B, M, C, height_in, width_in, K);
 
     // Stop layer timer
-    timer.Stop();
-    float duration_layer = timer.Elapsed();
-
-    std::cout << "\t - Layer Time: " << duration_layer << " ms" << std::endl;
+    auto end_time_layer = std::chrono::high_resolution_clock::now();
 
     // Launch barrier kernel to aid with timing with nsight-compute
-    // gpuInterface.insert_post_barrier_kernel();
+    gpuUtils.insert_post_barrier_kernel();
 
-    // std::chrono::duration<float, std::milli> duration_layer = (end_time_layer - start_time_layer);
-    // std::cout << "Layer Time: " << duration_layer << " ms" << std::endl;
+    // GpuTimer timer;
+    // timer.Start();
+    // my_GPU.conv_forward_gpu_caller(y, x, k, B, M, C, height_in, width_in, K);
 
-    // std::chrono::duration<float, std::milli> duration_kernel = (end_time_kernel - start_time_kernel);
-    // std::cout << "Op Time: " << duration_kernel << " ms" << std::endl;
+    // // Stop layer timer
+    // timer.Stop();
+    // float duration_layer = timer.Elapsed();
+
+    // std::cout << "\t - Layer Time: " << duration_layer << " ms" << std::endl;
+
+    // Launch barrier kernel to aid with timing with nsight-compute
+    //gpuUtils.insert_post_barrier_kernel();
+
+    std::chrono::duration<float, std::milli> duration_layer = (end_time_layer - start_time_layer);
+    std::cout << "Layer Time: " << duration_layer << " ms" << std::endl;
+
+    std::chrono::duration<float, std::milli> duration_kernel = (end_time_kernel - start_time_kernel);
+    std::cout << "Op Time: " << duration_kernel << " ms" << std::endl;
 }
 
 // col2im, used for grad_bottom
