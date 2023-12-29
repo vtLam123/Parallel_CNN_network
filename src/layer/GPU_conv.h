@@ -39,6 +39,7 @@ private:
     GPUInterface gpuInterface;
     GPU_Utils gpuUtils;
     GPU_Support gpuSupport;
+    MyGPU my_GPU;
 
     void init();
 

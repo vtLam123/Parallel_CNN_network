@@ -103,7 +103,7 @@ void Conv_cust::forward(const Matrix &bottom)
 
     GpuTimer timer;
     timer.Start();
-    gpuSupport.conv_forward_gpu_caller(y, x, k, B, M, C, height_in, width_in, K);
+    my_GPU.conv_forward_gpu_caller(y, x, k, B, M, C, height_in, width_in, K);
 
     // Stop layer timer
     timer.Stop();

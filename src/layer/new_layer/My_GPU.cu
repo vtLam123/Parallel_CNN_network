@@ -30,7 +30,7 @@ __global__ void conv_forward_gpu(float *y, const float *x, const float *k, const
 }
 
 // Function to call the CUDA kernel
-__host__ void GPUSupport::conv_forward_gpu_caller(float *y, const float *x, const float *k, const int B, const int M, const int C, const int H, const int W, const int K)
+__host__ void MyGPU::conv_forward_gpu_caller(float *y, const float *x, const float *k, const int B, const int M, const int C, const int H, const int W, const int K)
 {
     const int H_out = H - K + 1;
     const int W_out = W - K + 1;

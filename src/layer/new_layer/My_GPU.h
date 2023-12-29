@@ -3,7 +3,7 @@
 #include <cuda_runtime.h>
 
 // Use this class to define GPU functions that students don't need access to.
-class GPU_Support
+class MyGPU
 {
 public:
     void conv_forward_gpu_caller(float *y, const float *x, const float *k, const int B, const int M, const int C, const int H, const int W, const int K);
