@@ -12,7 +12,7 @@ void trainModel(int n_epoch, int batch_size)
     std::cout << "mnist test number: " << dataset.test_labels.cols() << std::endl;
 
     std::cout << "Loading model...\n";
-    Network dnn = createNetwork_GPU();
+    Network dnn = createNetwork_CPU();
 
     // train & test
     SGD opt(0.001, 5e-4, 0.9, true);
