@@ -9,7 +9,7 @@ __global__ void conv_forward_kernel(float *y, const float *x, const float *k, co
 
     const int H_out = H - K + 1;
     const int W_out = W - K + 1;
-    ////ssss
+
     // An example use of these macros:
     // float a = y4d(0,0,0,0)
     // y4d(0,0,0,0) = a
@@ -111,43 +111,6 @@ __host__ void GPUInterface::conv_forward_gpu_epilog(float *host_y, float *device
     cudaFree(device_x);
     cudaFree(device_y);
     cudaFree(device_k);
-}
-
-
-__host__ void GPUInterface::conv_forward_gpu_full(float *output_data, const float *input_data, const float *weight_data,
-                                                  const int num_samples, const int output_channel, const int input_channel,
-                                                  const int height_in, const int width_in, const int kernel_height)
-{
-    const int height_out = height_in - kernel_height + 1;
-    const int width_out = width_in - kernel_height + 1;
-
-    // Allocate device memory
-    float *device_input, *device_output, *device_weight;
-    cudaMalloc((void **)&device_input, num_samples * input_channel * height_in * width_in * sizeof(float));  // input features map is input_channel
-    cudaMalloc((void **)&device_output, num_samples * output_channel * height_out * width_out * sizeof(float));  // output feature map is output_channel
-    cudaMalloc((void **)&device_weight, output_channel * input_channel * kernel_height * kernel_height * sizeof(float));  // input_channel * output_channel filter Maps of size kernel_height * kernel_height
-
-    // Copy input and mask data to device
-    cudaMemcpy(device_input, input_data, num_samples * input_channel * height_in * width_in * sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(device_weight, weight_data, output_channel * input_channel * kernel_height * kernel_height * sizeof(float), cudaMemcpyHostToDevice);
-
-    // Set the kernel dimensions and call the kernel
-    int height_grid = ceil(1.0 * height_out / TILE_WIDTH);
-    int width_grid = ceil(1.0 * width_out / TILE_WIDTH);
-    int Z = height_grid * width_grid;
-    dim3 num_threads_per_block(TILE_WIDTH, TILE_WIDTH, 1);
-    dim3 num_blocks_in_grid(num_samples, output_channel, Z);
-
-    // Launch the kernel
-    conv_forward_kernel<<<num_blocks_in_grid, num_threads_per_block>>>(device_output, device_input, device_weight, num_samples, output_channel, input_channel, height_in, width_in, kernel_height);
-
-    // Copy the output back to host
-    cudaMemcpy(output_data, device_output, num_samples * output_channel * height_out * width_out * sizeof(float), cudaMemcpyDeviceToHost);
-
-    // Free device memory
-    cudaFree(device_input);
-    cudaFree(device_output);
-    cudaFree(device_weight);
 }
 
 __host__ void GPUInterface::get_device_properties()

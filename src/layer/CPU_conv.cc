@@ -18,45 +18,51 @@ void Conv_CPU::init()
   // std::cout << weight.colwise().sum() + bias.transpose() << std::endl;
 }
 
-// im2col, used for bottom
-// image size: Vector (height_in * width_in * channel_in)
-// data_col size: Matrix (hw_out, hw_kernel * channel_in)
-void Conv_CPU::im2col(const Vector &image, Matrix &data_col)
+__global__ void im2col_gpu_kernel(const int n, const float *data_im,
+                                  const int height, const int width, const int ksize,
+                                  const int pad, const int stride, const int height_col, const int width_col,
+                                  float *data_col)
 {
-  int hw_in = height_in * width_in;
-  int hw_kernel = height_kernel * width_kernel;
-  int hw_out = height_out * width_out;
-  // im2col
-  data_col.resize(hw_out, hw_kernel * channel_in);
-  for (int c = 0; c < channel_in; c++)
+  int index = blockIdx.x * blockDim.x + threadIdx.x;
+  for (; index < n; index += blockDim.x * gridDim.x)
   {
-    Vector map = image.block(hw_in * c, 0, hw_in, 1); // c-th channel map
-    for (int i = 0; i < hw_out; i++)
+    int w_out = index % width_col;
+    int h_index = index / width_col;
+    int h_out = h_index % height_col;
+    int channel_in = h_index / height_col;
+    int channel_out = channel_in * ksize * ksize;
+    int h_in = h_out * stride - pad;
+    int w_in = w_out * stride - pad;
+    float *data_col_ptr = data_col;
+    data_col_ptr += (channel_out * height_col + h_out) * width_col + w_out;
+    const float *data_im_ptr = data_im;
+    data_im_ptr += (channel_in * height + h_in) * width + w_in;
+    for (int i = 0; i < ksize; ++i)
     {
-      int step_h = i / width_out;
-      int step_w = i % width_out;
-      int start_idx = step_h * width_in * stride + step_w * stride; // left-top idx of window
-      for (int j = 0; j < hw_kernel; j++)
+      for (int j = 0; j < ksize; ++j)
       {
-        int cur_col = start_idx % width_in + j % width_kernel - pad_w; // col after padding
-        int cur_row = start_idx / width_in + j / width_kernel - pad_h;
-        if (cur_col < 0 || cur_col >= width_in || cur_row < 0 ||
-            cur_row >= height_in)
-        {
-          data_col(i, c * hw_kernel + j) = 0;
-        }
-        else
-        {
-          // int pick_idx = start_idx + (j / width_kernel) * width_in + j % width_kernel;
-          int pick_idx = cur_row * width_in + cur_col;
-          data_col(i, c * hw_kernel + j) = map(pick_idx); // pick which pixel
-        }
+        int h = h_in + i;
+        int w = w_in + j;
+        *data_col_ptr =
+            (h >= 0 && w >= 0 && h < height && w < width) ? data_im_ptr[i * width + j] : 0;
+        data_col_ptr += height_col * width_col;
       }
     }
   }
 }
 
-void Conv_CPU::forward(const Matrix &bottom)
+void Conv_GPU::im2col(const Vector &image, Matrix &data_col)
+{
+  int height_col = (height_in + 2 * pad_h - height_kernel) / stride_h + 1;
+  int width_col = (width_in + 2 * pad_w - width_kernel) / stride_w + 1;
+  int num_kernels = channel_in * height_col * width_col;
+  im2col_gpu_kernel<<<(num_kernels + CUDA_NUM_THREADS - 1) / CUDA_NUM_THREADS,
+                      CUDA_NUM_THREADS>>>(
+      num_kernels, image.data(), height_in, width_in, height_kernel, pad_h,
+      stride_h, height_col, width_col, data_col.data());
+}
+
+void Conv::forward(const Matrix &bottom)
 {
   // Start timer
   auto start_time = std::chrono::high_resolution_clock::now();

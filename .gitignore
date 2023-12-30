@@ -21,6 +21,3 @@
 # dnnNetwork.o
 # main.o
 # # this is gitignore file
-
-
-src\layer\custom
