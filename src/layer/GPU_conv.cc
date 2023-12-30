@@ -87,7 +87,8 @@ void Conv_cust::forward(const Matrix &bottom)
     // Start kernel timer
     auto start_time_kernel = std::chrono::high_resolution_clock::now();
     // Hand off to GPU for computation
-    gpuInterface.conv_forward_gpu(y_d, x_d, k_d, B, M, C, height_in, width_in, K);
+    //gpuInterface.conv_forward_gpu(y_d, x_d, k_d, B, M, C, height_in, width_in, K);
+    myGPU.conv_forward_gpu_caller(y, x, k, B, M, C, height_in, width_in, K);
     cudaDeviceSynchronize();
     // Stop kernel timer
     auto end_time_kernel = std::chrono::high_resolution_clock::now();
@@ -104,8 +105,8 @@ void Conv_cust::forward(const Matrix &bottom)
     std::chrono::duration<float, std::milli> duration_layer = (end_time_layer - start_time_layer);
     std::cout << "Layer Time: " << duration_layer.count() << " ms" << std::endl;
 
-    std::chrono::duration<float, std::milli> duration_kernel = (end_time_kernel - start_time_kernel);
-    std::cout << "Op Time: " << duration_kernel.count() << " ms" << std::endl;
+    // std::chrono::duration<float, std::milli> duration_kernel = (end_time_kernel - start_time_kernel);
+    // std::cout << "Op Time: " << duration_kernel.count() << " ms" << std::endl;
 }
 
 // col2im, used for grad_bottom

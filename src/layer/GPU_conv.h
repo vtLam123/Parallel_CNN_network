@@ -8,6 +8,7 @@
 #include "./new_layer/GPU_new_forward.h"
 #include "./new_layer/GPU_utils.h"
 #include "./new_layer/GPU_forward_conv.h"
+#include "./new_layer/My_GPU.h"
 
 class Conv_cust : public Layer
 {
@@ -37,6 +38,7 @@ private:
 
     GPUInterface gpuInterface;
     GPU_Utils gpuUtils;
+    MyGPU myGPU;
 
     void init();
 
