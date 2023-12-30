@@ -116,9 +116,9 @@ void Conv_cust::forward(const Matrix &bottom)
     // Launch barrier kernel to aid with timing with nsight-compute
     gpuUtils.insert_post_barrier_kernel();
 
-    std::chrono::duration<float, std::milli> duration_layer = (end_time_layer - start_time_layer);
-    std::cout << "Layer Time: " << duration_layer << " ms" << std::endl;
-
+    std::chrono::duration<float, std::milli> duration_layer = (end_time_layer-start_time_layer);
+    std::cout<<"Layer Time: " << duration_layer.count() << " ms"<<std::endl;
+  
     // std::chrono::duration<float, std::milli> duration_kernel = (end_time_kernel - start_time_kernel);
     // std::cout << "Op Time: " << duration_kernel << " ms" << std::endl;
 }
