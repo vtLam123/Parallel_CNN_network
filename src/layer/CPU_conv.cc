@@ -1,4 +1,3 @@
-#include "conv_cpu.h"
 #include <math.h>
 #include <iostream>
 
