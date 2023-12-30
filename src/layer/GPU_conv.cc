@@ -87,7 +87,7 @@ void Conv_cust::forward(const Matrix &bottom)
     ///Start kernel timer
     ///auto start_time_kernel = std::chrono::high_resolution_clock::now();
     // Hand off to GPU for computation
-    gpuSupport.conv_forward_gpu_caller(y, x, k, B, M, C, height_in, width_in, K);
+    my_GPU.conv_forward_gpu_caller(y, x, k, B, M, C, height_in, width_in, K);
 
     //gpuInterface.conv_forward_gpu(y_d, x_d, k_d, B, M, C, height_in, width_in, K);
     cudaDeviceSynchronize();
