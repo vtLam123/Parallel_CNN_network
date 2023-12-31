@@ -106,11 +106,11 @@ void Conv_CPU::forward(const Matrix &bottom)
   // Stop timer
   auto end_time = std::chrono::high_resolution_clock::now();
 
-  // After calling conv_forward_cpu
-for(int i = 0; i < top.size(); i++) {
-    std::cout << y[i] << " ";
-}
-  std::cout << std::endl;
+//   // After calling conv_forward_cpu
+// for(int i = 0; i < top.size(); i++) {
+//     std::cout << y[i] << " ";
+// }
+//   std::cout << std::endl;
   std::chrono::duration<float, std::milli> duration = (end_time - start_time);
   std::cout << "Op Time: " << duration.count() << " ms" << std::endl;
 }
