@@ -77,12 +77,18 @@ void Conv_cust::forward(const Matrix &bottom)
     std::cout << "Conv-GPU==" << std::endl;
 
     // Launch marker kernel to aid with student function timing
-    gpuUtils.insert_pre_barrier_kernel();
+    //gpuUtils.insert_pre_barrier_kernel();
+
+
+    if(C == 1)
+        std::cout << "Convolution c1 - GPU" << std::endl;
+    else
+        std::cout << "Convolution c3 - GPU" << std::endl;
 
     // Start layer timer
     auto start_time_layer = std::chrono::high_resolution_clock::now();
     // Data transfer CPU to GPU
-    gpuInterface.conv_forward_gpu_prolog(y, x, k, &y_d, &x_d, &k_d, B, M, C, height_in, width_in, K);
+    //gpuInterface.conv_forward_gpu_prolog(y, x, k, &y_d, &x_d, &k_d, B, M, C, height_in, width_in, K);
 
     // Start kernel timer
     auto start_time_kernel = std::chrono::high_resolution_clock::now();
@@ -94,13 +100,13 @@ void Conv_cust::forward(const Matrix &bottom)
     auto end_time_kernel = std::chrono::high_resolution_clock::now();
 
     // Data transfer GPU to CPU
-    gpuInterface.conv_forward_gpu_epilog(y, y_d, x_d, k_d, B, M, C, height_in, width_in, K);
+    //gpuInterface.conv_forward_gpu_epilog(y, y_d, x_d, k_d, B, M, C, height_in, width_in, K);
 
     // Stop layer timer
     auto end_time_layer = std::chrono::high_resolution_clock::now();
 
     // Launch barrier kernel to aid with timing with nsight-compute
-    gpuUtils.insert_post_barrier_kernel();
+    //gpuUtils.insert_post_barrier_kernel();
 
     std::chrono::duration<float, std::milli> duration_layer = (end_time_layer - start_time_layer);
     std::cout << "Layer Time: " << duration_layer.count() << " ms" << std::endl;
