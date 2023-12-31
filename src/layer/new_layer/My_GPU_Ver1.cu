@@ -79,7 +79,7 @@ __host__ void MyGPU::conv_forward_gpu_caller(float *y, const float *x, const flo
     dim3 gridDim((W_out - 1) / TILE_WIDTH + 1, (H_out - 1) / TILE_WIDTH + 1);
     dim3 blockDim(TILE_WIDTH, TILE_WIDTH);
 
-    conv_forward_gpu_optimized<<<gridDim, blockDim>>>(d_y, d_x, d_k, B, M, C, H, W, K, H_out, W_out);
+    conv_forward_gpu<<<gridDim, blockDim>>>(d_y, d_x, d_k, B, M, C, H, W, K, H_out, W_out);
 
     cudaMemcpy(y, d_y, B * M * H_out * W_out * sizeof(float), cudaMemcpyDeviceToHost);
 
