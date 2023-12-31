@@ -1,66 +1,25 @@
 #include "My_GPU.h"
 
 #include <cuda_runtime.h>
+#include <cuda_runtime.h>
 
+#define TILE_WIDTH 16
 
-// CUDA kernel for convolutionssss
-// __global__ void conv_forward_gpu(float *y, const float *x, const float *k, const int B, const int M, const int C, const int H, const int W, const int K, const int H_out, const int W_out)
-// {
-//     int b = blockIdx.x;
-//     int m = blockIdx.y;
-//     int h = threadIdx.x;
-//     int w = threadIdx.y;
-
-//     if (b < B && m < M && h < H_out && w < W_out)
-//     {
-//         float sum = 0;
-//         for (int c = 0; c < C; c++)
-//         {
-//             for (int p = 0; p < K; p++)
-//             {
-//                 for (int q = 0; q < K; q++)
-//                 {
-//                     int x_index = ((b * C + c) * H + h + p) * W + w + q;
-//                     int k_index = ((m * C + c) * K + p) * K + q;
-//                     sum += x[x_index] * k[k_index];
-//                 }
-//             }
-//         }
-//         y[((b * M + m) * H_out + h) * W_out + w] = sum;
-//     }
-// }
-
-// // Function to call the CUDA kernel
-// __host__ void MyGPU::conv_forward_gpu_caller(float *y, const float *x, const float *k, const int B, const int M, const int C, const int H, const int W, const int K)
-// {
-//     const int H_out = H - K + 1;
-//     const int W_out = W - K + 1;
-
-//     dim3 blocks(B, M);
-//     dim3 threads(H_out, W_out);
-
-//     conv_forward_gpu<<<blocks, threads>>>(y, x, k, B, M, C, H, W, K, H_out, W_out);
-
-//     cudaDeviceSynchronize();
-// }
-
-// Define the constant memory for the filter
-__constant__ float d_k_const[3200]; //MxCxKxK = 4x16x7x7
+// Declare the constant memory for the filter
+__constant__ float const_k[TILE_WIDTH][TILE_WIDTH];
 
 __global__ void conv_forward_gpu(float *y, const float *x, const int B, const int M, const int C, const int H, const int W, const int K, const int H_out, const int W_out)
 {
-    // Get the block and thread indices
-    int bx = blockIdx.x; // block index along x-axis
-    int by = blockIdx.y; // block index along y-axis
-    int tx = threadIdx.x; // thread index within a block along x-axis
+    // Shared memory for input tiles
+    __shared__ float ds_x[TILE_WIDTH][TILE_WIDTH];
 
     // Calculate the output pixel coordinates
-    int h = by; // output pixel row
-    int w = bx; // output pixel column
+    int h = blockIdx.y * TILE_WIDTH + threadIdx.y;
+    int w = blockIdx.x * TILE_WIDTH + threadIdx.x;
 
     // Calculate the input image and output feature map indices
-    int b = tx / M; // input image index
-    int m = tx % M; // output feature map index
+    int b = threadIdx.z / M;
+    int m = threadIdx.z % M;
 
     // Initialize the output pixel value to zero
     float sum = 0.0f;
@@ -68,28 +27,36 @@ __global__ void conv_forward_gpu(float *y, const float *x, const int B, const in
     // Loop over the filter coefficients
     for (int c = 0; c < C; c++)
     {
+        // Load input tiles into shared memory
+        for (int i = threadIdx.y; i < K; i += blockDim.y)
+        {
+            for (int j = threadIdx.x; j < K; j += blockDim.x)
+            {
+                ds_x[i][j] = x[(b * C + c) * H * W + (h + i) * W + (w + j)];
+            }
+        }
+
+        // Synchronize to make sure the tiles are loaded
+        __syncthreads();
+
+        // Accumulate the product of the input pixel and the filter coefficient
         for (int p = 0; p < K; p++)
         {
             for (int q = 0; q < K; q++)
             {
-                // Calculate the input pixel coordinates
-                int i = h + p; // input pixel row
-                int j = w + q; // input pixel column
-
-                // Get the input pixel value
-                float x_val = x[(b * C + c) * H * W + i * W + j];
-
-                // Get the filter coefficient from constant memory
-                float k_val = d_k_const[(m * C + c) * K * K + p * K + q];
-
-                // Accumulate the product of the input pixel and the filter coefficient
-                sum += x_val * k_val;
+                sum += ds_x[p][q] * const_k[p][q];
             }
         }
+
+        // Synchronize to make sure that the preceding computation is done before loading new tiles
+        __syncthreads();
     }
 
     // Store the output pixel value
-    y[(b * M + m) * H_out * W_out + h * W_out + w] = sum;
+    if (h < H_out && w < W_out)
+    {
+        y[(b * M + m) * H_out * W_out + h * W_out + w] = sum;
+    }
 }
 
 __host__ void MyGPU::conv_forward_gpu_caller(float *y, const float *x, const float *k, const int B, const int M, const int C, const int H, const int W, const int K)
@@ -107,14 +74,14 @@ __host__ void MyGPU::conv_forward_gpu_caller(float *y, const float *x, const flo
     cudaMemcpy(d_x, x, B * C * H * W * sizeof(float), cudaMemcpyHostToDevice);
 
     // Copy filter from host to constant memory
-    cudaMemcpyToSymbol(d_k_const, k, M * C * K * K * sizeof(float));
+    cudaMemcpyToSymbol(const_k, k, M * C * K * K * sizeof(float));
 
     // Define the grid and block dimensions
-    dim3 gridDim(W_out, H_out); // grid size is H_out * W_out
-    dim3 blockDim(B * M, 1); // block size is B * M
+    dim3 gridDim((W_out - 1) / TILE_WIDTH + 1, (H_out - 1) / TILE_WIDTH + 1);
+    dim3 blockDim(TILE_WIDTH, TILE_WIDTH, B * M);
 
     // Launch the kernel
-    conv_forward_gpu<<<gridDim, blockDim>>>(y, x, B, M, C, H, W, K, H_out, W_out);
+    conv_forward_gpu<<<gridDim, blockDim>>>(d_y, d_x, B, M, C, H, W, K, H_out, W_out);
 
     // Copy output from device to host
     cudaMemcpy(y, d_y, B * M * H_out * W_out * sizeof(float), cudaMemcpyDeviceToHost);
@@ -123,5 +90,3 @@ __host__ void MyGPU::conv_forward_gpu_caller(float *y, const float *x, const flo
     cudaFree(d_x);
     cudaFree(d_y);
 }
-
-
