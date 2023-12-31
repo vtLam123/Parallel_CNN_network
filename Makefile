@@ -72,6 +72,7 @@ setup:
 	make layer
 	make loss
 	make optimizer
+	make main
 
 clean:
 	rm -f infoGPU infoGPU.o main main.o
