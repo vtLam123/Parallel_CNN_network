@@ -65,7 +65,6 @@ optimizer: src/optimizer/sgd.cc
 	nvcc --compile src/optimizer/sgd.cc -o src/optimizer/sgd.o -I./ -L/usr/local/cuda/lib64 -lcudart
 
 setup: 
-	make main.o
 	make dnnNetwork.o
 	make network.o
 	make mnist.o
@@ -75,7 +74,8 @@ setup:
 	make main
 
 clean:
-	rm -f infoGPU infoGPU.o main main.o
-
+##	rm -f infoGPU infoGPU.o main main.o
+	rm main
+	rm main.o
 run: main
 	./main
