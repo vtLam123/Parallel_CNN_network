@@ -6,7 +6,7 @@
 
 ############################################################################
 
-main: main.o dnnNetwork.o network.o mnist.o layer new_layer loss optimizer
+main: main.o dnnNetwork.o network.o mnist.o layer loss optimizer
 	nvcc -o main -lm -lcuda -lrt main.o dnnNetwork.o src/network.o src/mnist.o src/layer/*.o src/loss/*.o src/optimizer/*.o -I./ -L/usr/local/cuda/lib64 -lcudart
 
 main.o: main.cc
@@ -40,6 +40,21 @@ new_layer:
 ##	nvcc --compile src/layer/new_layer/My_GPU.cu -o src/layer/My_GPU.o -I./ -L/usr/local/cuda/lib64 -lcudart 
 	nvcc --compile src/layer/new_layer/My_GPU_Ver1.cu -o src/layer/My_GPU_Ver1.o -I./ -L/usr/local/cuda/lib64 -lcudart 
 
+gpu_basic:
+	nvcc --compile src/layer/new_layer/CPU_forward_conv.cc -o src/layer/CPU_forward_conv.o -I./ -L/usr/local/cuda/lib64 -lcudart 
+	nvcc --compile src/layer/new_layer/GPU_forward_conv.cu -o src/layer/GPU_forward_conv.o -I./ -L/usr/local/cuda/lib64 -lcudart 
+	nvcc --compile src/layer/new_layer/GPU_utils.cu -o src/layer/GPU_utils.o -I./ -L/usr/local/cuda/lib64 -lcudart 
+	nvcc --compile src/layer/new_layer/GPU_new_forward_basic.cu -o src/layer/GPU_new_forward_basic.o -I./ -L/usr/local/cuda/lib64 -lcudart 
+	nvcc --compile src/layer/new_layer/My_GPU.cu -o src/layer/My_GPU.o -I./ -L/usr/local/cuda/lib64 -lcudart 
+
+gpu_opver1:
+	nvcc --compile src/layer/new_layer/CPU_forward_conv.cc -o src/layer/CPU_forward_conv.o -I./ -L/usr/local/cuda/lib64 -lcudart 
+	nvcc --compile src/layer/new_layer/GPU_forward_conv.cu -o src/layer/GPU_forward_conv.o -I./ -L/usr/local/cuda/lib64 -lcudart 
+	nvcc --compile src/layer/new_layer/GPU_utils.cu -o src/layer/GPU_utils.o -I./ -L/usr/local/cuda/lib64 -lcudart 
+	nvcc --compile src/layer/new_layer/GPU_new_forward_basic.cu -o src/layer/GPU_new_forward_basic.o -I./ -L/usr/local/cuda/lib64 -lcudart 
+	nvcc --compile src/layer/new_layer/My_GPU_Ver1.cu -o src/layer/My_GPU_Ver1.o -I./ -L/usr/local/cuda/lib64 -lcudart 
+
+
 	
 
 loss: src/loss/cross_entropy_loss.cc src/loss/mse_loss.cc
@@ -48,6 +63,14 @@ loss: src/loss/cross_entropy_loss.cc src/loss/mse_loss.cc
 
 optimizer: src/optimizer/sgd.cc
 	nvcc --compile src/optimizer/sgd.cc -o src/optimizer/sgd.o -I./ -L/usr/local/cuda/lib64 -lcudart
+
+setup: 
+	make dnnNetwork.o
+	make network.o
+	make mnist.o
+	make layer
+	make loss
+	make optimizer
 
 clean:
 	rm -f infoGPU infoGPU.o main main.o
