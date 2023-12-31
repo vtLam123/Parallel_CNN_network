@@ -41,6 +41,7 @@ new_layer:
 	nvcc --compile src/layer/new_layer/My_GPU_Ver1.cu -o src/layer/My_GPU_Ver1.o -I./ -L/usr/local/cuda/lib64 -lcudart 
 
 gpu_basic:
+	rm -f src/layer/*.o
 	nvcc --compile src/layer/new_layer/CPU_forward_conv.cc -o src/layer/CPU_forward_conv.o -I./ -L/usr/local/cuda/lib64 -lcudart 
 	nvcc --compile src/layer/new_layer/GPU_forward_conv.cu -o src/layer/GPU_forward_conv.o -I./ -L/usr/local/cuda/lib64 -lcudart 
 	nvcc --compile src/layer/new_layer/GPU_utils.cu -o src/layer/GPU_utils.o -I./ -L/usr/local/cuda/lib64 -lcudart 
@@ -48,6 +49,7 @@ gpu_basic:
 	nvcc --compile src/layer/new_layer/My_GPU.cu -o src/layer/My_GPU.o -I./ -L/usr/local/cuda/lib64 -lcudart 
 
 gpu_opver1:
+	rm -f src/layer/*.o
 	nvcc --compile src/layer/new_layer/CPU_forward_conv.cc -o src/layer/CPU_forward_conv.o -I./ -L/usr/local/cuda/lib64 -lcudart 
 	nvcc --compile src/layer/new_layer/GPU_forward_conv.cu -o src/layer/GPU_forward_conv.o -I./ -L/usr/local/cuda/lib64 -lcudart 
 	nvcc --compile src/layer/new_layer/GPU_utils.cu -o src/layer/GPU_utils.o -I./ -L/usr/local/cuda/lib64 -lcudart 
@@ -65,12 +67,12 @@ optimizer: src/optimizer/sgd.cc
 	nvcc --compile src/optimizer/sgd.cc -o src/optimizer/sgd.o -I./ -L/usr/local/cuda/lib64 -lcudart
 
 setup: 
-	make dnnNetwork.o
-	make network.o
-	make mnist.o
-	make layer
-	make loss
-	make optimizer
+#	make dnnNetwork.o
+#	make network.o
+#	make mnist.o
+#	make layer
+#	make loss
+#	make optimizer
 	make main
 
 clean:
