@@ -56,58 +56,64 @@ void Conv_CPU::im2col(const Vector &image, Matrix &data_col)
   }
 }
 
-void Conv_CPU::forward(const Matrix &bottom)
-{
-  // Start timer
-  auto start_time = std::chrono::high_resolution_clock::now();
-  std::cout << "Conv-CPU==" << std::endl;
-
-  int n_sample = bottom.cols();
-  top.resize(height_out * width_out * channel_out, n_sample);
-  data_cols.resize(n_sample);
-  for (int i = 0; i < n_sample; i++)
-  {
-    // im2col
-    Matrix data_col;
-    im2col(bottom.col(i), data_col);
-    data_cols[i] = data_col;
-    // conv by product
-    Matrix result = data_col * weight; // result: (hw_out, channel_out)
-    result.rowwise() += bias.transpose();
-    top.col(i) = Eigen::Map<Vector>(result.data(), result.size());
-  }
-
-  // Stop timer
-  auto end_time = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<float, std::milli> duration = (end_time - start_time);
-  std::cout << "Op Time: " << duration.count() << " ms" << std::endl;
-}
-
 // void Conv_CPU::forward(const Matrix &bottom)
 // {
-//   int n_sample = bottom.cols();
-//   top.resize(height_out * width_out * channel_out, n_sample);
-//   float *x = (float *)bottom.data();
-//   float *y = (float *)top.data();
-//   float *k = (float *)weight.data();
-//   float *b = (float *)bias.data();
-
-//   const int B = n_sample;
-//   const int M = channel_out;
-//   const int C = channel_in;
-//   const int K = height_kernel; // Assuming width_kernel is also K
-
-//   std::cout << "Conv-CPU==" << std::endl;
 //   // Start timer
 //   auto start_time = std::chrono::high_resolution_clock::now();
+//   std::cout << "Conv-CPU==" << std::endl;
 
-//   conv_forward_cpu(y, x, k, B, M, C, height_in, width_in, K);
+//   int n_sample = bottom.cols();
+//   top.resize(height_out * width_out * channel_out, n_sample);
+//   data_cols.resize(n_sample);
+//   for (int i = 0; i < n_sample; i++)
+//   {
+//     // im2col
+//     Matrix data_col;
+//     im2col(bottom.col(i), data_col);
+//     data_cols[i] = data_col;
+//     // conv by product
+//     Matrix result = data_col * weight; // result: (hw_out, channel_out)
+//     result.rowwise() += bias.transpose();
+//     top.col(i) = Eigen::Map<Vector>(result.data(), result.size());
+//   }
 
 //   // Stop timer
 //   auto end_time = std::chrono::high_resolution_clock::now();
 //   std::chrono::duration<float, std::milli> duration = (end_time - start_time);
 //   std::cout << "Op Time: " << duration.count() << " ms" << std::endl;
 // }
+
+void Conv_CPU::forward(const Matrix &bottom)
+{
+  int n_sample = bottom.cols();
+  top.resize(height_out * width_out * channel_out, n_sample);
+  float *x = (float *)bottom.data();
+  float *y = (float *)top.data();
+  float *k = (float *)weight.data();
+  float *b = (float *)bias.data();
+
+  const int B = n_sample;
+  const int M = channel_out;
+  const int C = channel_in;
+  const int K = height_kernel; // Assuming width_kernel is also K
+
+  std::cout << "Conv-CPU==" << std::endl;
+  // Start timer
+  auto start_time = std::chrono::high_resolution_clock::now();
+
+  conv_forward_cpu(y, x, k, B, M, C, height_in, width_in, K);
+
+  // Stop timer
+  auto end_time = std::chrono::high_resolution_clock::now();
+
+  // After calling conv_forward_cpu
+for(int i = 0; i < top.size(); i++) {
+    std::cout << y[i] << " ";
+}
+  std::cout << std::endl;
+  std::chrono::duration<float, std::milli> duration = (end_time - start_time);
+  std::cout << "Op Time: " << duration.count() << " ms" << std::endl;
+}
 
 // col2im, used for grad_bottom
 // data_col size: Matrix (hw_out, hw_kernel * channel_in)

@@ -49,7 +49,6 @@ __global__ void conv_forward_gpu(float *y, const float *x, const float *k, const
     int bx = blockIdx.x; // block index along x-axis
     int by = blockIdx.y; // block index along y-axis
     int tx = threadIdx.x; // thread index within a block along x-axis
-    int ty = threadIdx.y; // thread index within a block along y-axis
 
     // Calculate the output pixel coordinates
     int h = by; // output pixel row
