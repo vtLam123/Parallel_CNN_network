@@ -19,7 +19,6 @@ void trainModel(int n_epoch, int batch_size)
     float accuracy = compute_accuracy(dnn.output(), dataset.test_labels);
     std::cout << "test accuracy: " << accuracy << std::endl;
     
-    return 0;
 
     // train & test
     //SGD opt(0.001, 5e-4, 0.9, true);
