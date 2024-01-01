@@ -1,4 +1,4 @@
-demo: demo.o gpu_basic layer
+demo: demo.o gpu_basic
 	nvcc -o demo -lm -lcuda -lrt demo.o src/network.o src/mnist.o src/layer/*.o src/loss/*.o src/layer/new_layer/*.o src/optimizer/*.o -I./ -L/usr/local/cuda/lib64 -lcudart
 
 demo.o: demo.cc
@@ -67,13 +67,12 @@ optimizer: src/optimizer/sgd.cc
 	nvcc --compile src/optimizer/sgd.cc -o src/optimizer/sgd.o -I./ -L/usr/local/cuda/lib64 -lcudart
 
 setup: 
-#	make dnnNetwork.o
-#	make network.o
-#	make mnist.o
-#	make layer
-#	make loss
-#	make optimizer
-	make main
+	make dnnNetwork.o
+	make network.o
+	make mnist.o
+	make layer
+	make loss
+	make optimizer
 
 clean:
 ##	rm -f infoGPU infoGPU.o main main.o
