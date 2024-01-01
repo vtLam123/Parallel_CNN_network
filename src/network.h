@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 #include <vector>
+#include <string>
+#include <fstream>
 #include "./layer.h"
 #include "./loss.h"
 #include "./optimizer.h"
@@ -12,6 +14,7 @@ class Network {
  private:
   std::vector<Layer*> layers;  // layer pointers
   Loss* loss;  // loss pointer
+  float BIN_FILE_DELIM = 0xFFFFFFFF;
 
  public:
   Network() : loss(NULL) {}
