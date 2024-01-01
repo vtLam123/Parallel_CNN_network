@@ -80,4 +80,3 @@ __host__ void MyGPU::conv_forward_gpu_caller(float *y, const float *x, const flo
     cudaFree(d_k);
 }
 
-
