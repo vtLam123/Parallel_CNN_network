@@ -20,7 +20,7 @@ void trainModel(int n_epoch, int batch_size)
     // std::cout << "test accuracy: " << accuracy << std::endl;
     
 
-    train & test
+   // train & test
     SGD opt(0.001, 5e-4, 0.9, true);
 
     // train
