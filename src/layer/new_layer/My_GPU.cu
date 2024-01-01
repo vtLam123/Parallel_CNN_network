@@ -49,10 +49,9 @@
 //     y[(b * M + m) * H_out * W_out + h * W_out + w] = sum;
 // }
 
-__global__ void conv_forward_kernel(float *y, const float *x, const float *k, const int B, const int M, const int C, const int H, const int W, const int K)
+__global__ void conv_forward_kernel(float *y, const float *x, const float *k, const int B, const int M, const int C, const int H, const int W, const int K, const int H_out, const int K_out)
 {
-    const int H_out = H - K + 1;
-    const int W_out = W - K + 1;
+    
 
     int H_grid = ceil(1.0*H_out / TILE_WIDTH);
     int W_grid = ceil(1.0*W_out / TILE_WIDTH); 
@@ -99,7 +98,7 @@ __host__ void MyGPU::conv_forward_gpu_caller(float *y, const float *x, const flo
 
     // Launch the kernel
     //conv_forward_gpu<<<gridDim, blockDim>>>(y, x, k, B, M, C, H, W, K, H_out, W_out);
-    conv_forward_kernel<<<gridDim, blockDim>>>(y, x, k, B, M, C, H, W, K);
+    conv_forward_kernel<<<gridDim, blockDim>>>(y, x, k, B, M, C, H, W, K, H_out, W_out);
 
     // Copy output from device to host
     cudaMemcpy(y, d_y, B * M * H_out * W_out * sizeof(float), cudaMemcpyDeviceToHost);
