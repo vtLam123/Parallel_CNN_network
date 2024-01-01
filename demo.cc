@@ -29,7 +29,7 @@
 int main()
 {
   // data
-  MNIST dataset("../data/mnist/");
+  MNIST dataset("./data/mnist/");
   // MNIST dataset("/content/Parallel_CNN_network/data/mnist/");
 
   dataset.read();
