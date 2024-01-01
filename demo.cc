@@ -12,7 +12,6 @@
 #include "src/layer.h"
 #include "src/layer/CPU_conv.h"
 #include "src/layer/conv.h"
-#include "src/layer/CPU_forward_conv.h"
 #include "src/layer/fully_connected.h"
 #include "src/layer/ave_pooling.h"
 #include "src/layer/max_pooling.h"

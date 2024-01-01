@@ -1,10 +1,10 @@
-demo:	demo.o custom
+demo: demo.o custom
 	nvcc -o demo -lm -lcuda -lrt demo.o src/network.o src/mnist.o src/layer/*.o src/loss/*.o src/layer/custom/*.o src/optimizer/*.o -I./ -L/usr/local/cuda/lib64 -lcudart
 
-demo.o:	demo.cc
+demo.o: demo.cc
 	nvcc --compile demo.cc -I./ -L/usr/local/cuda/lib64 -lcudart
 
-train_model:	demo
+train_model: demo
 	./demo
 
 main: main.o dnnNetwork.o network.o mnist.o layer loss optimizer
