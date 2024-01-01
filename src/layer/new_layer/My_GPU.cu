@@ -2,6 +2,7 @@
 
 #include <cuda_runtime.h>
 
+#define TILE_WIDTH 16
 
 // __global__ void conv_forward_gpu(float *y, const float *x, const float *k, const int B, const int M, const int C, const int H, const int W, const int K, const int H_out, const int W_out)
 // {
@@ -98,7 +99,7 @@ __host__ void MyGPU::conv_forward_gpu_caller(float *y, const float *x, const flo
 
     // Launch the kernel
     //conv_forward_gpu<<<gridDim, blockDim>>>(y, x, k, B, M, C, H, W, K, H_out, W_out);
-    conv_forward_kernel<<<gridDim, blockDim>>>(y, x, k, B, M, C, H, W, K)
+    conv_forward_kernel<<<gridDim, blockDim>>>(y, x, k, B, M, C, H, W, K);
 
     // Copy output from device to host
     cudaMemcpy(y, d_y, B * M * H_out * W_out * sizeof(float), cudaMemcpyDeviceToHost);
