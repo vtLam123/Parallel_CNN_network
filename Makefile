@@ -1,4 +1,4 @@
-demo: demo.o gpu_basic
+demo: demo.o
 	nvcc -o demo -lm -lcuda -lrt demo.o src/network.o src/mnist.o src/layer/*.o src/loss/*.o src/layer/new_layer/*.o src/optimizer/*.o -I./ -L/usr/local/cuda/lib64 -lcudart
 
 demo.o: demo.cc
