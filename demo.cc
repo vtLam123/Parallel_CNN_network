@@ -102,5 +102,8 @@ int main()
     std::cout << epoch + 1 << "-th epoch, test acc: " << acc << std::endl;
     std::cout << std::endl;
   }
+
+  dnn.save_parameters("./model/weights.bin");
+
   return 0;
 }
