@@ -35,6 +35,8 @@ Network createNetwork_CPU()
 
     // load weitghts
 
+    dnn.load_parameters("./model/weights.bin");
+
     return dnn;
 }
 
@@ -72,6 +74,8 @@ Network createNetwork_GPU()
     dnn.add_loss(loss);
 
     // load weitghts
+
+    dnn.load_parameters("./model/weights.bin");
 
     return dnn;
 }
