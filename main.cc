@@ -1,7 +1,7 @@
 #include "dnnNetwork.h"
 
 // void trainModel(int n_epoch, int batch_size)
-main()
+int main()
 {
     // data
     std::cout << "Loading fashion-mnist data...\n";
