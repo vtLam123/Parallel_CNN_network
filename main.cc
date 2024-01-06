@@ -20,7 +20,7 @@
 #include "src/network.h"
 #include "src/optimizer.h"
 #include "src/optimizer/sgd.h"
-#include "dnnNetwork.h"
+#include "Network.h"
 
 void trainModel(int n_epoch, int batch_size)
 // int main()
