@@ -8,7 +8,7 @@ Triển khai trên CUDA, nhóm sẽ tiến hành cài đặt tối ưu hóa conv
    * Đầu vào: vector có kích thước 28x28
    * Đầu ra: 6 lớp có kích thước 14x14
  -	Lớp convolution C3:
-   * Đầu vào: 6 lớp có kích thước 1x12
+    * Đầu vào: 6 lớp có kích thước 1x12
     * Đầu ra: 16 lớp có kích thước 10x10
 
 
