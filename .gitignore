@@ -18,7 +18,7 @@
 
 # src/mnist.o
 # src/network.o
-# dnnNetwork.o
+# Network.o
 # main.o
 # # this is gitignore file
 #src\layer\conv-gpu.cc

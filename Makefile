@@ -7,14 +7,14 @@ demo.o: demo.cc
 train_model: demo
 	./demo
 
-main: main.o dnnNetwork.o network.o mnist.o layer loss optimizer
-	nvcc -o main -lm -lcuda -lrt main.o dnnNetwork.o src/network.o src/mnist.o src/layer/*.o src/loss/*.o src/optimizer/*.o -I./ -L/usr/local/cuda/lib64 -lcudart
+main: main.o Network.o network.o mnist.o layer loss optimizer
+	nvcc -o main -lm -lcuda -lrt main.o Network.o src/network.o src/mnist.o src/layer/*.o src/loss/*.o src/optimizer/*.o -I./ -L/usr/local/cuda/lib64 -lcudart
 
 main.o: main.cc
 	nvcc --compile main.cc -o main.o -I./ -L/usr/local/cuda/lib64 -lcudart
 
-dnnNetwork.o: dnnNetwork.cc
-	nvcc --compile dnnNetwork.cc -o dnnNetwork.o -I./ -L/usr/local/cuda/lib64 -lcudart
+Network.o: Network.cc
+	nvcc --compile Network.cc -o Network.o -I./ -L/usr/local/cuda/lib64 -lcudart
 
 network.o: src/network.cc
 	nvcc --compile src/network.cc -o src/network.o -I./ -L/usr/local/cuda/lib64 -lcudart

@@ -1,5 +1,5 @@
-#ifndef SRC_LAYER_CONV_CUST_H_
-#define SRC_LAYER_CONV_CUST_H_
+#ifndef SRC_LAYER_Conv_GPU_H_
+#define SRC_LAYER_Conv_GPU_H_
 
 #include <vector>
 #include <chrono>
@@ -8,7 +8,7 @@
 #include "./custom/gpu-new-forward.h"
 
 
-class Conv_Custom: public Layer {
+class Conv_GPUom: public Layer {
  private:
   const int dim_in;
   int dim_out;
@@ -39,7 +39,7 @@ class Conv_Custom: public Layer {
   void init();
 
  public:
-  Conv_Custom(int channel_in, int height_in, int width_in, int channel_out,
+  Conv_GPUom(int channel_in, int height_in, int width_in, int channel_out,
        int height_kernel, int width_kernel, int stride = 1, int pad_w = 0,
        int pad_h = 0) :
        dim_in(channel_in * height_in * width_in),
@@ -57,4 +57,4 @@ class Conv_Custom: public Layer {
   void set_parameters(const std::vector<float>& param);
 };
 
-#endif  // SRC_LAYER_CONV_CUST_H_
+#endif  // SRC_LAYER_Conv_GPU_H_
