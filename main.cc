@@ -41,20 +41,6 @@ void trainModel(int n_epoch, int batch_size)
     //  // 2. Host - CPU Network
     // std::cout << "Test: Host - CPU Network" << std::endl;
     Network dnn = createNetwork_CPU();
-    // dnn1.load_parameters("./model/weights_cpu.bin");
-    // dnn1.forward(dataset.test_data);
-    // accuracy = compute_accuracy(dnn1.output(), dataset.test_labels);
-    // std::cout << "test accuracy: " << accuracy << std::endl;
-    // std::cout << "==============================" << std::endl;
-
-    // // 3. Device - GPU Network
-    // Network dnn2 = createNetwork_GPU();
-    // dnn2.load_parameters("./model/weights_cpu.bin");
-    // dnn2.forward(dataset.test_data);
-    // accuracy = compute_accuracy(dnn2.output(), dataset.test_labels);
-    // std::cout << "test accuracy: " << accuracy << std::endl;
-
-    // return 0;
 
     dnn.load_parameters("./model/weights_cpu.bin");
     dnn.forward(dataset.test_data);
