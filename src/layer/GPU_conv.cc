@@ -1,6 +1,7 @@
 #include "GPU_conv.h"
 #include <math.h>
 #include <iostream>
+#include <cuda_runtime_api.h>
 
 void Conv_GPU::init()
 {
