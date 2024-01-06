@@ -60,5 +60,5 @@ Sửa dòng code 43 thành `Network dnn = createNetwork_GPU();` trong file `./ma
 !make gpu_opver2
 !make main
 ```
-Result: 
-LeNet-like CNN can obtain `0.85+` accuracy on Fashion MNIST testset.
+## Result: 
+CNN giống LeNet có thể đạt được độ chính xác `0,85+` trên bộ kiểm tra Fashion MNIST.
