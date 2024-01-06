@@ -24,7 +24,7 @@ Triển khai trên CUDA, nhóm sẽ tiến hành cài đặt tối ưu hóa conv
 Cuối cùng, đồ án này mục đích sử dụng CUDA và các phương pháp tối ưu hóa bằng cách thiết kế và triển khai theo chiều xuôi của **Neural-Network Convolutional** trên **Colab**.
 
 ## Bộ dữ liệu
-Tải về và giải nén [MNIST](http://yann.lecun.com/exdb/mnist/) dataset in `./data/mnist/`.
+Tải về và giải nén [Fashion MNIST](https://github.com/zalandoresearch/fashion-mnist) dataset in `./data/mnist/`.
 
 ## Train model
 ```shell
