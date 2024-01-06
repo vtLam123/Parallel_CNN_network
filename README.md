@@ -33,7 +33,13 @@ Tải về và giải nén [Fashion MNIST](https://github.com/zalandoresearch/fa
 !make train_model
 ```
 
-Run `./demo`.
+## Test 
+Sửa dòng code 43 thành `Network dnn = createNetwork_CPU();` trong file `./main.cc`
+```shell
+!make clean
+!make gpu_basic
+!make main
+```
 
 Result: 
 simple neural network with 3 FC layers can obtain `0.97+` accuracy on MNIST testset.
