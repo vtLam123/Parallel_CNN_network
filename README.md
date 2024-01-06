@@ -52,7 +52,6 @@ Sửa dòng code 43 thành `Network dnn = createNetwork_GPU();` trong file `./ma
 ```shell
 !make clean
 !make gpu_opver1
-#!make gpu_opver2
 !make main
 ```
 ### GPU Optimize Version 2
